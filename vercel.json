@@ -3,11 +3,7 @@
   "outputDirectory": ".next",
   "framework": "nextjs",
   "installCommand": "npm install",
-  "env": {
-    "NEXT_PUBLIC_SUPABASE_URL": "@supabase-url",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@supabase-anon-key",
-    "OPENAI_API_KEY": "@openai-api-key"
-  },
+
   "functions": {
     "src/app/api/**/*.ts": {
       "maxDuration": 30
