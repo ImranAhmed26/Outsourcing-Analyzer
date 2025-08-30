@@ -190,6 +190,13 @@ export async function POST(request: NextRequest) {
       keyInsights: analysisResult.keyInsights || [],
       riskFactors: analysisResult.riskFactors || [],
       opportunities: analysisResult.opportunities || [],
+      keyPeople: enhancedCompanyData.keyPeople || [],
+      dataSourcesUsed: enhancedCompanyData.dataSourcesUsed || {
+        linkedin: false,
+        crunchbase: false,
+        website: false,
+        emailVerification: false,
+      },
       // Enhanced activity data
       recentActivity: {
         newsCount: enhancedCompanyData.recentNews?.length || 0,
@@ -222,6 +229,12 @@ export async function POST(request: NextRequest) {
             riskFactors: analysisResult.riskFactors || [],
             opportunities: analysisResult.opportunities || [],
             keyPeople: enhancedCompanyData.keyPeople || [],
+            dataSourcesUsed: enhancedCompanyData.dataSourcesUsed || {
+              linkedin: false,
+              crunchbase: false,
+              website: false,
+              emailVerification: false,
+            },
             recentActivity: {
               newsCount: enhancedCompanyData.recentNews?.length || 0,
               jobPostingsCount: enhancedCompanyData.jobPostings?.length || 0,
@@ -251,6 +264,12 @@ export async function POST(request: NextRequest) {
           riskFactors: analysisResult.riskFactors || [],
           opportunities: analysisResult.opportunities || [],
           keyPeople: enhancedCompanyData.keyPeople || [],
+          dataSourcesUsed: enhancedCompanyData.dataSourcesUsed || {
+            linkedin: false,
+            crunchbase: false,
+            website: false,
+            emailVerification: false,
+          },
           recentActivity: {
             newsCount: enhancedCompanyData.recentNews?.length || 0,
             jobPostingsCount: enhancedCompanyData.jobPostings?.length || 0,
@@ -274,7 +293,13 @@ export async function POST(request: NextRequest) {
       keyInsights: (savedResult.analysis as DatabaseCompanyResult['analysis']).keyInsights || [],
       riskFactors: (savedResult.analysis as DatabaseCompanyResult['analysis']).riskFactors || [],
       opportunities: (savedResult.analysis as DatabaseCompanyResult['analysis']).opportunities || [],
-      keyPeople: enhancedCompanyData.keyPeople || [],
+      keyPeople: (savedResult.analysis as DatabaseCompanyResult['analysis']).keyPeople || [],
+      dataSourcesUsed: (savedResult.analysis as DatabaseCompanyResult['analysis']).dataSourcesUsed || {
+        linkedin: false,
+        crunchbase: false,
+        website: false,
+        emailVerification: false,
+      },
       recentActivity: (savedResult.analysis as DatabaseCompanyResult['analysis']).recentActivity || {
         newsCount: 0,
         jobPostingsCount: 0,

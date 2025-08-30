@@ -29,6 +29,31 @@ describe('AnalysisCard', () => {
     possibleServices: ['Customer Support', 'Data Entry', 'Software Development'],
     logoUrl: 'https://example.com/logo.png',
     createdAt: new Date('2024-01-15T10:30:00Z'),
+    confidence: 85,
+    keyInsights: ['Strong growth indicators', 'Active hiring in tech roles'],
+    riskFactors: ['High competition in market'],
+    opportunities: ['Expanding into new markets'],
+    keyPeople: [
+      {
+        name: 'John Smith',
+        position: 'CEO',
+        email: 'john.smith@testcompany.com',
+        linkedin: 'https://linkedin.com/in/johnsmith',
+        department: 'Executive',
+      },
+      {
+        name: 'Jane Doe',
+        position: 'CTO',
+        email: 'jane.doe@testcompany.com',
+        department: 'Technology',
+      },
+    ],
+    dataSourcesUsed: {
+      linkedin: true,
+      crunchbase: false,
+      website: true,
+      emailVerification: true,
+    },
   };
 
   it('renders company name and analysis correctly', () => {
@@ -113,5 +138,78 @@ describe('AnalysisCard', () => {
 
     const card = container.firstChild as HTMLElement;
     expect(card).toHaveClass('custom-class');
+  });
+
+  describe('Key People section', () => {
+    it('displays key people when available', () => {
+      render(<AnalysisCard analysis={mockAnalysis} />);
+
+      expect(screen.getByText('Key People')).toBeInTheDocument();
+      expect(screen.getByText('John Smith')).toBeInTheDocument();
+      expect(screen.getByText('CEO')).toBeInTheDocument();
+      expect(screen.getByText('john.smith@testcompany.com')).toBeInTheDocument();
+      expect(screen.getByText('Jane Doe')).toBeInTheDocument();
+      expect(screen.getByText('CTO')).toBeInTheDocument();
+      expect(screen.getByText('jane.doe@testcompany.com')).toBeInTheDocument();
+    });
+
+    it('displays department badges when available', () => {
+      render(<AnalysisCard analysis={mockAnalysis} />);
+
+      expect(screen.getByText('Executive')).toBeInTheDocument();
+      expect(screen.getByText('Technology')).toBeInTheDocument();
+    });
+
+    it('displays LinkedIn links when available', () => {
+      render(<AnalysisCard analysis={mockAnalysis} />);
+
+      const linkedinLink = screen.getByTitle('View LinkedIn Profile');
+      expect(linkedinLink).toBeInTheDocument();
+      expect(linkedinLink).toHaveAttribute('href', 'https://linkedin.com/in/johnsmith');
+      expect(linkedinLink).toHaveAttribute('target', '_blank');
+      expect(linkedinLink).toHaveAttribute('rel', 'noopener noreferrer');
+    });
+
+    it('does not display LinkedIn link when not available', () => {
+      render(<AnalysisCard analysis={mockAnalysis} />);
+
+      // Jane Doe doesn't have a LinkedIn profile in the mock data
+      const linkedinLinks = screen.getAllByTitle('View LinkedIn Profile');
+      expect(linkedinLinks).toHaveLength(1); // Only John Smith has LinkedIn
+    });
+
+    it('does not show key people section when no people data', () => {
+      const analysisWithoutPeople = { ...mockAnalysis, keyPeople: [] };
+      render(<AnalysisCard analysis={analysisWithoutPeople} />);
+
+      expect(screen.queryByText('Key People')).not.toBeInTheDocument();
+    });
+
+    it('limits display to 5 people and shows count for additional people', () => {
+      const analysisWithManyPeople = {
+        ...mockAnalysis,
+        keyPeople: [
+          ...mockAnalysis.keyPeople,
+          { name: 'Person 3', position: 'CFO', email: 'person3@test.com', department: 'Finance' },
+          { name: 'Person 4', position: 'CMO', email: 'person4@test.com', department: 'Marketing' },
+          { name: 'Person 5', position: 'COO', email: 'person5@test.com', department: 'Operations' },
+          { name: 'Person 6', position: 'VP Sales', email: 'person6@test.com', department: 'Sales' },
+          { name: 'Person 7', position: 'VP Engineering', email: 'person7@test.com', department: 'Technology' },
+        ],
+      };
+
+      render(<AnalysisCard analysis={analysisWithManyPeople} />);
+
+      // Should show first 5 people
+      expect(screen.getByText('John Smith')).toBeInTheDocument();
+      expect(screen.getByText('Person 5')).toBeInTheDocument();
+
+      // Should show count for additional people
+      expect(screen.getByText('+2 more people')).toBeInTheDocument();
+
+      // Should not show the 6th and 7th person
+      expect(screen.queryByText('Person 6')).not.toBeInTheDocument();
+      expect(screen.queryByText('Person 7')).not.toBeInTheDocument();
+    });
   });
 });

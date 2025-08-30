@@ -12,6 +12,12 @@ export interface CompanyData {
   websiteContent?: WebsiteContent;
   socialMedia?: SocialMediaData;
   financialData?: FinancialData;
+  dataSourcesUsed?: {
+    linkedin: boolean;
+    crunchbase: boolean;
+    website: boolean;
+    emailVerification: boolean;
+  };
 }
 
 // Enhanced data types
@@ -36,12 +42,10 @@ export interface JobPosting {
 
 export interface KeyPerson {
   name: string;
-  title: string;
-  email?: string;
-  predictedEmail?: string;
-  linkedinUrl?: string;
-  department?: string;
-  seniority: 'C-Level' | 'VP' | 'Director' | 'Manager' | 'Senior' | 'Junior';
+  position: string;
+  email: string;
+  linkedin?: string;
+  department: string;
 }
 
 export interface WebsiteContent {
@@ -87,7 +91,13 @@ export interface AnalysisResult {
   keyInsights: string[];
   riskFactors: string[];
   opportunities: string[];
-  keyPeople?: KeyPerson[];
+  keyPeople: KeyPerson[];
+  dataSourcesUsed: {
+    linkedin: boolean;
+    crunchbase: boolean;
+    website: boolean;
+    emailVerification: boolean;
+  };
   recentActivity?: {
     newsCount: number;
     jobPostingsCount: number;
@@ -213,6 +223,16 @@ export interface OpenAIAnalysisResponse {
   opportunities: string[];
 }
 
+export interface EnhancedAnalysisResult extends AnalysisResult {
+  keyPeople: KeyPerson[];
+  dataSourcesUsed: {
+    linkedin: boolean;
+    crunchbase: boolean;
+    website: boolean;
+    emailVerification: boolean;
+  };
+}
+
 // Database Types
 export interface DatabaseCompanyResult {
   id: string;
@@ -226,6 +246,13 @@ export interface DatabaseCompanyResult {
     keyInsights?: string[];
     riskFactors?: string[];
     opportunities?: string[];
+    keyPeople?: KeyPerson[];
+    dataSourcesUsed?: {
+      linkedin: boolean;
+      crunchbase: boolean;
+      website: boolean;
+      emailVerification: boolean;
+    };
     recentActivity?: {
       newsCount: number;
       jobPostingsCount: number;

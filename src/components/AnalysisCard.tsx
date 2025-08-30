@@ -129,23 +129,44 @@ export default function AnalysisCard({ analysis, className = '' }: AnalysisCardP
       {analysis.keyPeople && analysis.keyPeople.length > 0 && (
         <div className='mb-6'>
           <h4 className='text-sm font-medium text-gray-900 mb-2'>Key People</h4>
-          <div className='space-y-2'>
-            {analysis.keyPeople.slice(0, 3).map((person, index) => (
-              <div key={index} className='flex items-center justify-between p-2 bg-gray-50 rounded-lg'>
-                <div>
-                  <div className='text-sm font-medium text-gray-900'>{person.name}</div>
-                  <div className='text-xs text-gray-500'>{person.title}</div>
-                </div>
-                {(person.email || person.predictedEmail) && (
-                  <div className='text-xs text-blue-600 font-mono'>
-                    {person.email || person.predictedEmail}
-                    {person.predictedEmail && !person.email && <span className='text-gray-400 ml-1'>(predicted)</span>}
+          <div className='space-y-3'>
+            {analysis.keyPeople.slice(0, 5).map((person, index) => (
+              <div key={index} className='p-3 bg-gray-50 rounded-lg'>
+                <div className='flex items-start justify-between'>
+                  <div className='flex-1 min-w-0'>
+                    <div className='flex items-center space-x-2 mb-1'>
+                      <div className='text-sm font-medium text-gray-900'>{person.name}</div>
+                      {person.linkedin && (
+                        <a
+                          href={person.linkedin}
+                          target='_blank'
+                          rel='noopener noreferrer'
+                          className='text-blue-600 hover:text-blue-800 transition-colors'
+                          title='View LinkedIn Profile'
+                        >
+                          <svg className='w-4 h-4' fill='currentColor' viewBox='0 0 24 24'>
+                            <path d='M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z'/>
+                          </svg>
+                        </a>
+                      )}
+                    </div>
+                    <div className='text-xs text-gray-600 mb-1'>{person.position}</div>
+                    {person.department && (
+                      <div className='text-xs text-gray-500 mb-2'>
+                        <span className='inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800'>
+                          {person.department}
+                        </span>
+                      </div>
+                    )}
+                    {person.email && (
+                      <div className='text-xs text-blue-600 font-mono break-all'>{person.email}</div>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
             ))}
-            {analysis.keyPeople.length > 3 && (
-              <div className='text-xs text-gray-500 text-center'>+{analysis.keyPeople.length - 3} more people</div>
+            {analysis.keyPeople.length > 5 && (
+              <div className='text-xs text-gray-500 text-center'>+{analysis.keyPeople.length - 5} more people</div>
             )}
           </div>
         </div>

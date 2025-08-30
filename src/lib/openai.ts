@@ -162,9 +162,9 @@ function createAnalysisPrompt(companyName: string, companyData: CompanyData): st
 
   if (companyData.keyPeople && companyData.keyPeople.length > 0) {
     enhancedContext += `\nKey Personnel:\n`;
-    const cLevel = companyData.keyPeople.filter((p) => p.seniority === 'C-Level');
+    const executives = companyData.keyPeople.filter((p) => p.department === 'Executive');
     const departments = [...new Set(companyData.keyPeople.map((p) => p.department).filter(Boolean))];
-    enhancedContext += `- ${cLevel.length} C-level executives identified\n`;
+    enhancedContext += `- ${executives.length} executive-level personnel identified\n`;
     if (departments.length > 0) {
       enhancedContext += `- Key departments: ${departments.join(', ')}\n`;
     }

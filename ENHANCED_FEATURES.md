@@ -35,14 +35,14 @@ The Outsourcing Analyzer has been significantly enhanced to provide deeper, real
 
 - Identifies C-level executives and key decision makers
 - Extracts titles, departments, and seniority levels
-- Sources: LinkedIn, company websites, press releases
+- Sources: LinkedIn (via RapidAPI), Crunchbase, company websites
 
-#### Email Address Prediction
+#### Email Address Prediction & Verification
 
-- Provides real email addresses when available
-- Predicts email patterns based on company domain
-- Common patterns: firstname.lastname@domain.com, first.last@domain.com
-- Confidence indicators for predicted vs. real emails
+- Predicts email patterns based on company domain and common formats
+- Verifies email deliverability using Hunter.io API
+- Common patterns: firstname.lastname@domain.com, firstnamelastname@domain.com, f.lastname@domain.com
+- Returns verified emails when available, falls back to predicted patterns
 
 ### 🤖 **Enhanced AI Analysis**
 
@@ -95,9 +95,9 @@ The Outsourcing Analyzer has been significantly enhanced to provide deeper, real
 
 ```env
 NEWS_API_KEY=your_newsapi_key
-LINKEDIN_API_KEY=your_linkedin_key
-INDEED_API_KEY=your_indeed_key
-GLASSDOOR_API_KEY=your_glassdoor_key
+RAPIDAPI_KEY=your_rapidapi_key              # For LinkedIn people data
+CRUNCHBASE_API_KEY=your_crunchbase_key      # For startup executive data
+HUNTER_API_KEY=your_hunter_key              # For email verification
 ```
 
 #### Fallback: Demo Data
@@ -130,14 +130,20 @@ The existing JSONB structure accommodates all enhanced data:
   "outsourcingLikelihood": "High|Medium|Low",
   "reasoning": "Enhanced reasoning with data references",
   "possibleServices": ["service1", "service2"],
-  "confidence": 85,
-  "keyInsights": ["insight1", "insight2"],
-  "riskFactors": ["risk1", "risk2"],
-  "opportunities": ["opportunity1", "opportunity2"],
-  "recentActivity": {
-    "newsCount": 5,
-    "jobPostingsCount": 12,
-    "hiringTrends": "Active hiring"
+  "keyPeople": [
+    {
+      "name": "John Doe",
+      "position": "Chief Technology Officer",
+      "email": "john.doe@company.com",
+      "linkedin": "https://linkedin.com/in/johndoe",
+      "department": "Technology"
+    }
+  ],
+  "dataSourcesUsed": {
+    "linkedin": true,
+    "crunchbase": false,
+    "website": true,
+    "emailVerification": true
   }
 }
 ```
@@ -164,10 +170,13 @@ const result = await analyzeCompany('Microsoft');
 ### Testing Enhanced Features
 
 ```bash
-# Test endpoint for enhanced data
-curl -X POST http://localhost:3000/api/test-enhanced \
+# Test endpoint for enhanced people data
+curl "http://localhost:3000/api/test-people?company=Apple&website=apple.com"
+
+# Test main analysis with enhanced data
+curl -X POST http://localhost:3000/api/analyze \
   -H "Content-Type: application/json" \
-  -d '{"companyName": "Apple"}'
+  -d '{"companyName": "Apple", "website": "apple.com"}'
 ```
 
 ## Configuration
@@ -182,19 +191,20 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_key
 
 # Optional for enhanced features
 NEWS_API_KEY=your_newsapi_key
-LINKEDIN_API_KEY=your_linkedin_key
-INDEED_API_KEY=your_indeed_key
-GLASSDOOR_API_KEY=your_glassdoor_key
+RAPIDAPI_KEY=your_rapidapi_key              # LinkedIn people data
+CRUNCHBASE_API_KEY=your_crunchbase_key      # Startup executive data
+HUNTER_API_KEY=your_hunter_key              # Email verification
 ```
 
 ### API Rate Limits
 
-| Service  | Free Tier Limit    | Cost                      |
-| -------- | ------------------ | ------------------------- |
-| NewsAPI  | 1,000 requests/day | $449/month for unlimited  |
-| LinkedIn | 100 requests/day   | Contact for pricing       |
-| Indeed   | 1,000 requests/day | $0.10 per request         |
-| OpenAI   | 3 RPM / 200 RPD    | $0.002-0.03 per 1K tokens |
+| Service    | Free Tier Limit    | Cost                      |
+| ---------- | ------------------ | ------------------------- |
+| NewsAPI    | 1,000 requests/day | $449/month for unlimited  |
+| RapidAPI   | Varies by endpoint | $0.001-0.01 per request   |
+| Crunchbase | 200 requests/day   | $49/month for 1K requests |
+| Hunter.io  | 25 requests/month  | $49/month for 1K requests |
+| OpenAI     | 3 RPM / 200 RPD    | $0.002-0.03 per 1K tokens |
 
 ## Performance Optimizations
 
