@@ -47,13 +47,22 @@ export default function RecentSearches({ className = '', refreshTrigger }: Recen
     }
   };
 
-  // Fetch recent searches from API
-  const fetchRecentSearches = async () => {
+  // Enhanced fetch with retry mechanism
+  const fetchRecentSearches = async (retryCount: number = 0): Promise<void> => {
+    const maxRetries = 2;
+
     try {
       setIsLoading(true);
       setError('');
 
-      const response = await fetch('/api/recent');
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+      const response = await fetch('/api/recent', {
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -69,11 +78,34 @@ export default function RecentSearches({ className = '', refreshTrigger }: Recen
     } catch (error) {
       console.error('Error fetching recent searches:', error);
 
+      // Retry logic for transient errors
+      if (retryCount < maxRetries && error instanceof Error) {
+        if (
+          error.message.includes('fetch') ||
+          error.message.includes('timeout') ||
+          error.message.includes('500') ||
+          error.message.includes('503')
+        ) {
+          const delay = 1000 * Math.pow(2, retryCount); // Exponential backoff
+          console.log(`Retrying recent searches fetch in ${delay}ms (attempt ${retryCount + 1}/${maxRetries})`);
+
+          setTimeout(() => {
+            fetchRecentSearches(retryCount + 1);
+          }, delay);
+          return;
+        }
+      }
+
+      // Set error message for display
       if (error instanceof Error) {
-        if (error.message.includes('fetch')) {
-          setError('Network error. Unable to load recent searches.');
+        if (error.message.includes('fetch') || error.message.includes('NetworkError')) {
+          setError('Unable to connect. Please check your internet connection.');
+        } else if (error.message.includes('timeout') || error.name === 'AbortError') {
+          setError('Request timed out. Please try again.');
         } else if (error.message.includes('500')) {
-          setError('Server error. Unable to load recent searches.');
+          setError('Server error. Please try again later.');
+        } else if (error.message.includes('503')) {
+          setError('Service temporarily unavailable. Please try again.');
         } else {
           setError(error.message || 'Failed to load recent searches.');
         }
@@ -85,10 +117,15 @@ export default function RecentSearches({ className = '', refreshTrigger }: Recen
     }
   };
 
+  // Create a wrapper function for the refresh button
+  const handleRefresh = () => {
+    fetchRecentSearches();
+  };
+
   // Fetch recent searches on component mount and when refreshTrigger changes
   useEffect(() => {
     fetchRecentSearches();
-  }, [refreshTrigger]);
+  }, [refreshTrigger]); // fetchRecentSearches is stable, no need to include it
 
   // Loading state
   if (isLoading) {
@@ -137,7 +174,7 @@ export default function RecentSearches({ className = '', refreshTrigger }: Recen
         <h2 className='text-lg font-semibold text-gray-900'>Recent Searches</h2>
         {recentSearches.length > 0 && (
           <button
-            onClick={fetchRecentSearches}
+            onClick={handleRefresh}
             className='text-sm text-blue-600 hover:text-blue-700 transition-colors duration-200'
             title='Refresh recent searches'
           >
@@ -166,7 +203,7 @@ export default function RecentSearches({ className = '', refreshTrigger }: Recen
             </svg>
             <p className='text-sm text-red-700'>{error}</p>
           </div>
-          <button onClick={fetchRecentSearches} className='mt-2 text-sm text-red-600 hover:text-red-700 underline'>
+          <button onClick={handleRefresh} className='mt-2 text-sm text-red-600 hover:text-red-700 underline'>
             Try again
           </button>
         </div>

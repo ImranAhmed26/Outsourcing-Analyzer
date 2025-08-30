@@ -211,34 +211,50 @@ function validateAnalysisResponse(response: unknown): asserts response is OpenAI
   }
 }
 
-// Retry mechanism for transient failures
+// Enhanced retry mechanism for transient failures with better error handling
 export async function analyzeCompanyWithRetry(
   companyName: string,
   companyData: CompanyData,
   maxRetries: number = 3,
-  baseDelay: number = 1000
+  baseDelay: number = 2000,
+  maxDelay: number = 30000
 ): Promise<OpenAIAnalysisResponse> {
   let lastError: Error;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
+      console.log(`OpenAI analysis attempt ${attempt}/${maxRetries} for ${companyName}`);
       return await analyzeCompanyOutsourcing(companyName, companyData);
     } catch (error) {
       lastError = error as Error;
 
-      // Don't retry for non-retryable errors
+      // Don't retry for non-retryable errors (auth errors, validation errors, etc.)
       if (error && typeof error === 'object' && 'retryable' in error && !error.retryable) {
+        console.log(`Non-retryable error for ${companyName}:`, error);
         throw error;
       }
 
       // Don't retry on the last attempt
       if (attempt === maxRetries) {
+        console.log(`Max retries reached for ${companyName}`);
         break;
       }
 
-      // Exponential backoff delay
-      const delay = baseDelay * Math.pow(2, attempt - 1);
-      await new Promise((resolve) => setTimeout(resolve, delay));
+      // Enhanced exponential backoff with jitter for rate limiting
+      const exponentialDelay = baseDelay * Math.pow(2, attempt - 1);
+      const jitter = Math.random() * 0.2 * exponentialDelay; // Add up to 20% jitter
+      const delay = Math.min(exponentialDelay + jitter, maxDelay);
+
+      console.log(`Retrying OpenAI analysis for ${companyName} after ${Math.round(delay)}ms (attempt ${attempt}/${maxRetries})`);
+
+      // For rate limit errors, wait longer
+      if (error && typeof error === 'object' && 'type' in error && error.type === 'RATE_LIMIT_ERROR') {
+        const rateLimitDelay = Math.min(delay * 2, maxDelay); // Double the delay for rate limits
+        console.log(`Rate limit detected, waiting ${Math.round(rateLimitDelay)}ms`);
+        await new Promise((resolve) => setTimeout(resolve, rateLimitDelay));
+      } else {
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
     }
   }
 

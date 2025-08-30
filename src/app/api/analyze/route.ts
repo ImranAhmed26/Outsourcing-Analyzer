@@ -108,19 +108,20 @@ export async function POST(request: NextRequest) {
       console.warn('Failed to check recent analysis, proceeding with fresh analysis:', error);
     }
 
-    // Step 1: Fetch company data from external APIs
+    // Step 1: Fetch company data from external APIs with graceful degradation
     let companyData;
     try {
       companyData = await fetchCompanyData(companyName);
     } catch (error) {
       console.error('Error fetching company data:', error);
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Failed to fetch company information. Please try again later.',
-        } as AnalyzeResponse,
-        { status: 503 }
-      );
+
+      // Instead of failing completely, provide minimal company data and continue
+      // This implements graceful degradation as required
+      console.log('Proceeding with minimal company data due to external API failures');
+      companyData = {
+        name: companyName,
+        description: `Analysis for ${companyName} (limited data available due to external service issues)`,
+      };
     }
 
     // Step 2: Analyze with OpenAI

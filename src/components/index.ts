@@ -3,6 +3,7 @@ export { default as LoadingSpinner } from './LoadingSpinner';
 export { default as LoadingState } from './LoadingState';
 export { default as ErrorMessage } from './ErrorMessage';
 export { default as ErrorBoundary } from './ErrorBoundary';
+export { default as SuccessMessage } from './SuccessMessage';
 
 // Existing Components
 export { default as AnalysisCard } from './AnalysisCard';

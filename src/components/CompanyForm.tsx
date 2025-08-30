@@ -4,13 +4,14 @@ import { useState, useCallback, useRef } from 'react';
 import { CompanyFormData, LoadingState, AnalysisResult, ApiResponse } from '@/types';
 
 interface CompanyFormProps {
-  onAnalysisResult: (result: AnalysisResult) => void;
+  onAnalysisResult: (result: AnalysisResult, hasWarning?: boolean) => void;
   onError: (error: string) => void;
+  onSuccess?: (message: string) => void;
   loadingState: LoadingState;
   onLoadingChange: (loading: LoadingState) => void;
 }
 
-export default function CompanyForm({ onAnalysisResult, onError, loadingState, onLoadingChange }: CompanyFormProps) {
+export default function CompanyForm({ onAnalysisResult, onError, onSuccess, loadingState, onLoadingChange }: CompanyFormProps) {
   const [formData, setFormData] = useState<CompanyFormData>({ companyName: '' });
   const [validationError, setValidationError] = useState<string>('');
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -98,14 +99,26 @@ export default function CompanyForm({ onAnalysisResult, onError, loadingState, o
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const result: ApiResponse<AnalysisResult> = await response.json();
+      const result: ApiResponse<AnalysisResult> & { warning?: string } = await response.json();
 
       if (!result.success || !result.data) {
         throw new Error(result.error || 'Analysis failed');
       }
 
+      // Check for warnings (e.g., analysis completed but couldn't save to history)
+      const hasWarning = !!result.warning;
+
       // Success - pass result to parent
-      onAnalysisResult(result.data);
+      onAnalysisResult(result.data, hasWarning);
+
+      // Show success message
+      if (onSuccess) {
+        if (hasWarning) {
+          onSuccess(`Analysis completed for ${result.data.companyName}, but couldn't save to history.`);
+        } else {
+          onSuccess(`Successfully analyzed ${result.data.companyName} and saved to history.`);
+        }
+      }
 
       // Clear form
       setFormData({ companyName: '' });
@@ -113,14 +126,24 @@ export default function CompanyForm({ onAnalysisResult, onError, loadingState, o
     } catch (error) {
       console.error('Analysis error:', error);
 
-      // Handle different types of errors
+      // Enhanced error handling with more specific messages
       if (error instanceof Error) {
-        if (error.message.includes('fetch')) {
-          onError('Network error. Please check your connection and try again.');
-        } else if (error.message.includes('429')) {
-          onError('Too many requests. Please wait a moment and try again.');
-        } else if (error.message.includes('500')) {
-          onError('Server error. Please try again later.');
+        if (error.message.includes('fetch') || error.message.includes('NetworkError')) {
+          onError('Unable to connect to our servers. Please check your internet connection and try again.');
+        } else if (error.message.includes('429') || error.message.includes('rate limit')) {
+          onError('Our AI service is currently busy. Please wait a few minutes and try again.');
+        } else if (error.message.includes('503') || error.message.includes('Service Unavailable')) {
+          onError('Our analysis service is temporarily unavailable. Please try again in a few minutes.');
+        } else if (error.message.includes('500') || error.message.includes('Internal Server Error')) {
+          onError('We encountered a server error. Our team has been notified. Please try again later.');
+        } else if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+          onError('Authentication error. Please refresh the page and try again.');
+        } else if (error.message.includes('timeout')) {
+          onError('The request took too long to complete. Please try again with a shorter company name.');
+        } else if (error.message.includes('AI analysis') || error.message.includes('OpenAI')) {
+          onError('Our AI analysis service is temporarily unavailable. Please try again later.');
+        } else if (error.message.includes('company information') || error.message.includes('external')) {
+          onError('We had trouble gathering company information, but you can still try the analysis.');
         } else {
           onError(error.message || 'An unexpected error occurred. Please try again.');
         }

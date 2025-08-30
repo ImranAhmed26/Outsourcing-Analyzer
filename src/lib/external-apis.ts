@@ -278,10 +278,11 @@ export async function fetchClearbitLogo(companyName: string, website?: string): 
  * Implements graceful degradation - continues with available data if some APIs fail
  */
 export async function fetchCompanyData(companyName: string): Promise<CompanyData> {
+  // Use retry mechanism for each API call
   const results = await Promise.allSettled([
-    fetchDuckDuckGoData(companyName),
-    fetchWikipediaData(companyName),
-    fetchClearbitLogo(companyName),
+    retryExternalApiCall('DuckDuckGo', () => fetchDuckDuckGoData(companyName)),
+    retryExternalApiCall('Wikipedia', () => fetchWikipediaData(companyName)),
+    retryExternalApiCall('Clearbit', () => fetchClearbitLogo(companyName)),
   ]);
 
   // Initialize with company name
@@ -323,15 +324,15 @@ export async function fetchCompanyData(companyName: string): Promise<CompanyData
     console.warn('Clearbit Logo API failed:', results[2].reason);
   }
 
-  // If we have a website but no logo, try fetching logo with the website
+  // If we have a website but no logo, try fetching logo with the website (with retry)
   if (aggregatedData.website && !aggregatedData.logoUrl) {
     try {
-      const logoUrl = await fetchClearbitLogo(companyName, aggregatedData.website);
+      const logoUrl = await retryExternalApiCall('Clearbit', () => fetchClearbitLogo(companyName, aggregatedData.website));
       if (logoUrl) {
         aggregatedData.logoUrl = logoUrl;
       }
     } catch (error) {
-      console.warn('Failed to fetch logo with website domain:', error);
+      console.warn('Failed to fetch logo with website domain after retries:', error);
     }
   }
 
@@ -349,9 +350,14 @@ export function isRetryableError(error: unknown): boolean {
 }
 
 /**
- * Utility function to implement exponential backoff retry logic
+ * Utility function to implement exponential backoff retry logic with jitter
  */
-export async function retryWithBackoff<T>(fn: () => Promise<T>, maxRetries: number = 3, baseDelay: number = 1000): Promise<T> {
+export async function retryWithBackoff<T>(
+  fn: () => Promise<T>,
+  maxRetries: number = 3,
+  baseDelay: number = 1000,
+  maxDelay: number = 10000
+): Promise<T> {
   let lastError: unknown;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -365,11 +371,35 @@ export async function retryWithBackoff<T>(fn: () => Promise<T>, maxRetries: numb
         break;
       }
 
-      // Calculate delay with exponential backoff
-      const delay = baseDelay * Math.pow(2, attempt);
+      // Calculate delay with exponential backoff and jitter
+      const exponentialDelay = baseDelay * Math.pow(2, attempt);
+      const jitter = Math.random() * 0.1 * exponentialDelay; // Add up to 10% jitter
+      const delay = Math.min(exponentialDelay + jitter, maxDelay);
+
+      console.log(`Retrying after ${Math.round(delay)}ms (attempt ${attempt + 1}/${maxRetries})`);
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
 
   throw lastError;
+}
+
+/**
+ * Enhanced retry mechanism specifically for external API calls
+ */
+export async function retryExternalApiCall<T>(apiName: string, fn: () => Promise<T>, maxRetries: number = 2): Promise<T> {
+  return retryWithBackoff(
+    async () => {
+      try {
+        return await fn();
+      } catch (error) {
+        // Log the attempt for debugging
+        console.warn(`${apiName} API call failed:`, error);
+        throw error;
+      }
+    },
+    maxRetries,
+    1000, // 1 second base delay
+    5000 // 5 second max delay
+  );
 }
