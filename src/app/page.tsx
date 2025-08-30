@@ -103,7 +103,7 @@ export default function Home() {
 
           <p className='text-xl text-gray-600 mb-12'>
             Better <span className='text-blue-600'>insights</span>, better <span className='text-blue-600'>accuracy</span>, more 
-            <span className='text-blue-600'> conversion</span>,
+            <span className='text-blue-600'> conversion</span>
           </p>
 
           {/* Search Input */}
