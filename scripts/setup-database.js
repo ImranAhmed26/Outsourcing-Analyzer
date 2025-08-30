@@ -1,47 +1,65 @@
-#!/usr/bin/env node
+const { createClient } = require('@supabase/supabase-js');
+const fs = require('fs');
+const path = require('path');
 
-/**
- * Database setup script for Outsourcing Analyzer
- * This script helps verify the database connection and provides setup instructions
- */
+// Load environment variables
+require('dotenv').config({ path: '.env.local' });
 
-const { testSupabaseConnection } = require('../src/lib/supabase');
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('Missing Supabase environment variables');
+  process.exit(1);
+}
+
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 async function setupDatabase() {
-  console.log('🔍 Testing Supabase connection...\n');
-
   try {
-    const result = await testSupabaseConnection();
+    console.log('Setting up database...');
 
-    if (result.success) {
-      console.log('✅ Supabase connection successful!');
-      console.log(`   ${result.message}\n`);
+    // Read the schema file
+    const schemaPath = path.join(__dirname, '..', 'database', 'schema.sql');
+    const schema = fs.readFileSync(schemaPath, 'utf8');
 
-      if (result.needsSchema) {
-        console.log('📋 Next steps:');
-        console.log('1. Go to your Supabase dashboard');
-        console.log('2. Navigate to the SQL Editor');
-        console.log('3. Copy and paste the contents of database/schema.sql');
-        console.log('4. Run the SQL to create the company_results table\n');
+    // Split the schema into individual statements
+    const statements = schema
+      .split(';')
+      .map((stmt) => stmt.trim())
+      .filter((stmt) => stmt.length > 0 && !stmt.startsWith('--'));
+
+    console.log(`Executing ${statements.length} SQL statements...`);
+
+    // Execute each statement
+    for (let i = 0; i < statements.length; i++) {
+      const statement = statements[i];
+      console.log(`Executing statement ${i + 1}/${statements.length}...`);
+
+      const { error } = await supabase.rpc('exec_sql', { sql: statement });
+
+      if (error) {
+        console.error(`Error executing statement ${i + 1}:`, error);
+        // Continue with other statements
       } else {
-        console.log('🎉 Database is ready to use!');
+        console.log(`Statement ${i + 1} executed successfully`);
       }
+    }
+
+    // Test the table by trying to query it
+    console.log('Testing table access...');
+    const { data, error } = await supabase.from('company_results').select('count').limit(1);
+
+    if (error) {
+      console.error('Error testing table:', error);
     } else {
-      console.log('❌ Supabase connection failed:');
-      console.log(`   ${result.message}\n`);
-      console.log('🔧 Troubleshooting:');
-      console.log('1. Check your .env.local file has the correct Supabase URL and anon key');
-      console.log('2. Verify your Supabase project is active');
-      console.log('3. Make sure your environment variables are properly formatted\n');
+      console.log('✅ Database setup completed successfully!');
+      console.log('Table is accessible and ready for use.');
     }
   } catch (error) {
-    console.log('❌ Unexpected error:', error.message);
+    console.error('Setup failed:', error);
+    process.exit(1);
   }
 }
 
-// Only run if this script is executed directly
-if (require.main === module) {
-  setupDatabase();
-}
-
-module.exports = { setupDatabase };
+setupDatabase();

@@ -176,6 +176,18 @@ export interface ExternalApiError extends AppError {
   statusCode: number;
 }
 
+export interface OpenAIApiError extends AppError {
+  type: ErrorType.OPENAI_API_ERROR;
+  apiName: 'OpenAI';
+  statusCode: number;
+}
+
+export interface RateLimitError extends AppError {
+  type: ErrorType.RATE_LIMIT_ERROR;
+  apiName: 'OpenAI';
+  statusCode: number;
+}
+
 export interface DatabaseError extends AppError {
   type: ErrorType.DATABASE_ERROR;
   operation: 'CREATE' | 'READ' | 'UPDATE' | 'DELETE';
