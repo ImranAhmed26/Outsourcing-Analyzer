@@ -69,8 +69,8 @@ export default function Home() {
   return (
     <div className='min-h-screen bg-white'>
       {/* Header */}
-      <header className='border-b border-gray-100'>
-        <div className='max-w-6xl mx-auto px-6 py-4'>
+      <header className='border-b border-gray-100 sticky top-0 bg-white'>
+        <div className='max-w-6xl mx-auto px-6 py-6'>
           <div className='flex items-center justify-between'>
             <div className='flex items-center space-x-3'>
               <div className='w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center'>
@@ -78,18 +78,10 @@ export default function Home() {
                   <path d='M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' />
                 </svg>
               </div>
-              <span className='text-xl font-semibold text-gray-900'>OutsourcingAnalyzer</span>
+              <span className='text-2xl p-0 font-bold text-orange-500'>Outsourcing</span>
+              <span className='text-2xl font-bold text-gray-700'>Analyzer </span>
             </div>
             <nav className='hidden md:flex items-center space-x-8 text-sm text-gray-600'>
-              <a href='#' className='hover:text-gray-900 transition-colors'>
-                Models
-              </a>
-              <a href='#' className='hover:text-gray-900 transition-colors'>
-                Chat
-              </a>
-              <a href='#' className='hover:text-gray-900 transition-colors'>
-                Rankings
-              </a>
               <a href='#' className='hover:text-gray-900 transition-colors'>
                 Docs
               </a>
@@ -104,13 +96,14 @@ export default function Home() {
         {/* Hero Section */}
         <div className='text-center mb-16'>
           <h1 className='text-5xl font-bold text-gray-700 mb-6'>
-            Validate <span className='text-indigo-700'>Business Leads</span> Easily with AI <br />
+            Validate <span className='text-orange-400'>Business Leads</span> Easily with{' '}
+            <span className='text-orange-400'>AI</span> <br />
             <span className='text-3xl'> Looking for Outsourcing Services </span>
           </h1>
 
           <p className='text-xl text-gray-600 mb-12'>
-            Better <span className='text-blue-600'>insights</span>, better <span className='text-blue-600'>accuracy</span>, no
-            subscription.
+            Better <span className='text-blue-600'>insights</span>, better <span className='text-blue-600'>accuracy</span>, more 
+            <span className='text-blue-600'> conversion</span>,
           </p>
 
           {/* Search Input */}

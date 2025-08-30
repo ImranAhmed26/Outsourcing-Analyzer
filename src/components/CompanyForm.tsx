@@ -80,11 +80,32 @@ export default function CompanyForm({ onAnalysisResult, onError, onSuccess, load
     // Clear any previous errors
     onError('');
 
-    // Set loading state
+    // Set loading state with enhanced messages
+    const loadingMessages = [
+      'Gathering company information...',
+      'Fetching recent news and updates...',
+      'Analyzing job postings and hiring trends...',
+      'Identifying key personnel...',
+      'Processing with AI analysis...',
+      'Finalizing insights...',
+    ];
+
+    let messageIndex = 0;
+    let messageInterval: NodeJS.Timeout | null = null;
+
     onLoadingChange({
       isLoading: true,
-      message: 'Analyzing company...',
+      message: loadingMessages[messageIndex],
     });
+
+    // Update loading message every 3 seconds
+    messageInterval = setInterval(() => {
+      messageIndex = (messageIndex + 1) % loadingMessages.length;
+      onLoadingChange({
+        isLoading: true,
+        message: loadingMessages[messageIndex],
+      });
+    }, 3000);
 
     try {
       const response = await fetch('/api/analyze', {
@@ -151,7 +172,10 @@ export default function CompanyForm({ onAnalysisResult, onError, onSuccess, load
         onError('An unexpected error occurred. Please try again.');
       }
     } finally {
-      // Clear loading state
+      // Clear loading state and interval
+      if (messageInterval) {
+        clearInterval(messageInterval);
+      }
       onLoadingChange({
         isLoading: false,
       });
@@ -180,8 +204,9 @@ export default function CompanyForm({ onAnalysisResult, onError, onSuccess, load
             disabled={loadingState.isLoading}
             className={`
               w-full px-4 py-4 pr-12 border border-gray-200 rounded-lg text-base
+              text-gray-900 placeholder-gray-500
               focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-              disabled:bg-gray-50 disabled:cursor-not-allowed
+              disabled:bg-gray-50 disabled:cursor-not-allowed disabled:text-gray-400
               transition-all duration-200
               ${validationError ? 'border-red-300 focus:ring-red-500' : 'border-gray-200'}
             `}

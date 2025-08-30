@@ -5,6 +5,73 @@ export interface CompanyData {
   industry?: string;
   logoUrl?: string;
   website?: string;
+  // Enhanced data
+  recentNews?: NewsItem[];
+  jobPostings?: JobPosting[];
+  keyPeople?: KeyPerson[];
+  websiteContent?: WebsiteContent;
+  socialMedia?: SocialMediaData;
+  financialData?: FinancialData;
+}
+
+// Enhanced data types
+export interface NewsItem {
+  title: string;
+  summary: string;
+  url: string;
+  publishedAt: string;
+  source: string;
+  sentiment?: 'positive' | 'negative' | 'neutral';
+}
+
+export interface JobPosting {
+  title: string;
+  department: string;
+  location: string;
+  type: 'full-time' | 'part-time' | 'contract' | 'remote';
+  postedAt: string;
+  url?: string;
+  isOutsourcingRelated?: boolean;
+}
+
+export interface KeyPerson {
+  name: string;
+  title: string;
+  email?: string;
+  predictedEmail?: string;
+  linkedinUrl?: string;
+  department?: string;
+  seniority: 'C-Level' | 'VP' | 'Director' | 'Manager' | 'Senior' | 'Junior';
+}
+
+export interface WebsiteContent {
+  title?: string;
+  description?: string;
+  services?: string[];
+  technologies?: string[];
+  teamSize?: string;
+  locations?: string[];
+  aboutText?: string;
+}
+
+export interface SocialMediaData {
+  linkedin?: {
+    followers: number;
+    employees: number;
+    industry: string;
+  };
+  twitter?: {
+    followers: number;
+    handle: string;
+  };
+}
+
+export interface FinancialData {
+  revenue?: string;
+  funding?: string;
+  employees?: string;
+  founded?: string;
+  headquarters?: string;
 }
 
 export interface AnalysisResult {
@@ -15,6 +82,17 @@ export interface AnalysisResult {
   possibleServices: string[];
   logoUrl?: string;
   createdAt: Date;
+  // Enhanced analysis data
+  confidence: number;
+  keyInsights: string[];
+  riskFactors: string[];
+  opportunities: string[];
+  keyPeople?: KeyPerson[];
+  recentActivity?: {
+    newsCount: number;
+    jobPostingsCount: number;
+    hiringTrends: string;
+  };
 }
 
 // API Response wrapper
@@ -130,6 +208,9 @@ export interface OpenAIAnalysisResponse {
   reasoning: string;
   possibleServices: string[];
   confidence: number;
+  keyInsights: string[];
+  riskFactors: string[];
+  opportunities: string[];
 }
 
 // Database Types
