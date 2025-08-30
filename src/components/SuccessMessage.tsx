@@ -40,6 +40,7 @@ export default function SuccessMessage({
 
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [autoHide, autoHideDelay, onDismiss]);
 
   return (

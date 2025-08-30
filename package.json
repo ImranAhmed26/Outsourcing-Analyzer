@@ -6,7 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "type-check": "tsc --noEmit",
+    "build:production": "npm run type-check && npm run lint && npm run build"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.56.1",
