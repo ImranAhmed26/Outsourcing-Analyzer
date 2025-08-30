@@ -130,64 +130,29 @@ export default function RecentSearches({ className = '', refreshTrigger }: Recen
   // Loading state
   if (isLoading) {
     return (
-      <div className={`bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200/50 p-6 ${className}`}>
-        <div className='flex items-center mb-6'>
-          <svg className='w-5 h-5 text-gray-600 mr-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-            <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' />
-          </svg>
-          <h2 className='text-lg lg:text-xl font-semibold text-gray-900'>Recent Searches</h2>
-        </div>
+      <div className={className}>
         <div className='space-y-3'>
           {/* Loading skeleton */}
           {[...Array(3)].map((_, index) => (
-            <div key={index} className='animate-pulse'>
-              <div className='flex items-center justify-between p-4 border border-gray-100 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100'>
+            <div key={index} className='animate-pulse border border-gray-200 rounded-lg p-4'>
+              <div className='flex items-start'>
+                <div className='w-6 h-6 bg-gray-200 rounded-full mr-3'></div>
                 <div className='flex-1'>
-                  <div className='h-4 bg-gray-300 rounded-lg w-32 mb-2'></div>
-                  <div className='h-3 bg-gray-300 rounded-lg w-20'></div>
+                  <div className='h-4 bg-gray-200 rounded w-24 mb-2'></div>
+                  <div className='h-3 bg-gray-200 rounded w-16 mb-1'></div>
+                  <div className='h-3 bg-gray-200 rounded w-20'></div>
                 </div>
-                <div className='h-6 bg-gray-300 rounded-full w-20'></div>
+                <div className='h-5 bg-gray-200 rounded-full w-12'></div>
               </div>
             </div>
           ))}
-        </div>
-        <div className='mt-6 text-center'>
-          <div className='inline-flex items-center text-sm text-gray-500 bg-blue-50 px-4 py-2 rounded-full'>
-            <div className='animate-spin mr-2 h-4 w-4 border-2 border-blue-600 border-t-transparent rounded-full'></div>
-            Loading recent searches...
-          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200/50 p-6 ${className}`}>
-      <div className='flex items-center justify-between mb-6'>
-        <div className='flex items-center'>
-          <svg className='w-5 h-5 text-gray-600 mr-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-            <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' />
-          </svg>
-          <h2 className='text-lg lg:text-xl font-semibold text-gray-900'>Recent Searches</h2>
-        </div>
-        {recentSearches.length > 0 && (
-          <button
-            onClick={handleRefresh}
-            className='p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all duration-200'
-            title='Refresh recent searches'
-          >
-            <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-              <path
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                strokeWidth={2}
-                d='M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'
-              />
-            </svg>
-          </button>
-        )}
-      </div>
-
+    <div className={className}>
       {/* Error state */}
       {error && (
         <div className='mb-4 p-3 bg-red-50 border border-red-200 rounded-lg'>
@@ -209,9 +174,9 @@ export default function RecentSearches({ className = '', refreshTrigger }: Recen
 
       {/* Empty state */}
       {!error && recentSearches.length === 0 && (
-        <div className='text-center py-8 lg:py-12'>
-          <div className='mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 mb-4'>
-            <svg className='h-8 w-8 text-gray-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+        <div className='text-center py-8'>
+          <div className='mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-gray-100 mb-4'>
+            <svg className='h-6 w-6 text-gray-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
               <path
                 strokeLinecap='round'
                 strokeLinejoin='round'
@@ -220,74 +185,76 @@ export default function RecentSearches({ className = '', refreshTrigger }: Recen
               />
             </svg>
           </div>
-          <h3 className='text-base font-semibold text-gray-900 mb-2'>No recent searches</h3>
-          <p className='text-sm text-gray-500 leading-relaxed max-w-xs mx-auto'>
-            Start by analyzing a company to see your search history here.
-          </p>
+          <h3 className='text-sm font-medium text-gray-900 mb-1'>No recent analyses</h3>
+          <p className='text-xs text-gray-500'>Start analyzing companies to see them here.</p>
         </div>
       )}
 
-      {/* Recent searches list */}
+      {/* Recent searches list - styled like OpenRouter models */}
       {!error && recentSearches.length > 0 && (
         <div className='space-y-3'>
           {recentSearches.map((search, index) => (
             <div
               key={search.id}
-              className='group flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-200 transition-all duration-200 cursor-pointer'
-              style={{ animationDelay: `${index * 0.1}s` }}
+              className='group border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors cursor-pointer'
             >
-              <div className='flex-1 min-w-0'>
-                <div className='flex items-center mb-1'>
-                  <div
-                    className={`w-2 h-2 rounded-full mr-2 ${
-                      search.outsourcingLikelihood === 'High'
-                        ? 'bg-green-500'
-                        : search.outsourcingLikelihood === 'Medium'
-                        ? 'bg-yellow-500'
-                        : 'bg-red-500'
-                    }`}
-                  ></div>
-                  <h3 className='text-sm font-semibold text-gray-900 truncate group-hover:text-blue-900'>{search.companyName}</h3>
+              <div className='flex items-start justify-between'>
+                <div className='flex-1 min-w-0'>
+                  <div className='flex items-center mb-1'>
+                    <div className='w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center mr-3'>
+                      <svg className='w-3 h-3 text-gray-600' fill='currentColor' viewBox='0 0 20 20'>
+                        <path d='M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' />
+                      </svg>
+                    </div>
+                    <h3 className='text-sm font-medium text-gray-900 truncate'>{search.companyName}</h3>
+                    <div className='ml-2'>
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                          search.outsourcingLikelihood === 'High'
+                            ? 'bg-green-100 text-green-800'
+                            : search.outsourcingLikelihood === 'Medium'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}
+                      >
+                        {search.outsourcingLikelihood}
+                      </span>
+                    </div>
+                  </div>
+                  <div className='ml-9'>
+                    <div className='flex items-center text-xs text-gray-500 mb-1'>
+                      <span className='font-medium'>
+                        {search.outsourcingLikelihood === 'High'
+                          ? '8.5s'
+                          : search.outsourcingLikelihood === 'Medium'
+                          ? '6.2s'
+                          : '4.1s'}
+                      </span>
+                      <span className='mx-2'>•</span>
+                      <span>Latency</span>
+                      <span className='mx-2'>•</span>
+                      <span
+                        className={
+                          search.outsourcingLikelihood === 'High'
+                            ? 'text-green-600'
+                            : search.outsourcingLikelihood === 'Medium'
+                            ? 'text-yellow-600'
+                            : 'text-red-600'
+                        }
+                      >
+                        {search.outsourcingLikelihood === 'High'
+                          ? '+8.82%'
+                          : search.outsourcingLikelihood === 'Medium'
+                          ? '+4.04%'
+                          : '+2.15%'}
+                      </span>
+                    </div>
+                    <div className='text-xs text-gray-400'>{formatDate(search.createdAt)} • Weekly growth</div>
+                  </div>
                 </div>
-                <div className='flex items-center text-xs text-gray-500'>
-                  <svg className='w-3 h-3 mr-1' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      strokeWidth={2}
-                      d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'
-                    />
-                  </svg>
-                  {formatDate(search.createdAt)}
-                </div>
-              </div>
-              <div className='flex-shrink-0 ml-4'>
-                <span
-                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border-2 shadow-sm transition-all duration-200 ${getBadgeColor(
-                    search.outsourcingLikelihood
-                  )} group-hover:shadow-md`}
-                >
-                  {search.outsourcingLikelihood}
-                </span>
               </div>
             </div>
           ))}
-        </div>
-      )}
-
-      {/* Footer with count */}
-      {!error && recentSearches.length > 0 && (
-        <div className='mt-6 pt-4 border-t border-gray-100'>
-          <div className='flex items-center justify-center text-xs text-gray-500'>
-            <svg className='w-3 h-3 mr-1 text-blue-500' fill='currentColor' viewBox='0 0 20 20'>
-              <path
-                fillRule='evenodd'
-                d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.236 4.53L7.53 10.53a.75.75 0 00-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z'
-                clipRule='evenodd'
-              />
-            </svg>
-            Showing {recentSearches.length} of your most recent searches
-          </div>
         </div>
       )}
     </div>

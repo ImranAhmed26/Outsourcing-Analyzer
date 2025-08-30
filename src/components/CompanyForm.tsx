@@ -166,125 +166,55 @@ export default function CompanyForm({ onAnalysisResult, onError, onSuccess, load
   };
 
   return (
-    <div className='w-full max-w-lg mx-auto'>
-      <form onSubmit={handleSubmit} className='space-y-6'>
-        <div>
-          <label htmlFor='companyName' className='block text-sm font-medium text-gray-700 mb-3'>
-            Company Name
-          </label>
-          <div className='relative'>
-            <input
-              type='text'
-              id='companyName'
-              name='companyName'
-              value={formData.companyName}
-              onChange={(e) => handleInputChange(e.target.value)}
-              onFocus={handleFocus}
-              placeholder='Enter company name (e.g., Apple, Microsoft)'
-              disabled={loadingState.isLoading}
-              className={`
-                w-full px-4 py-4 pl-12 border rounded-xl shadow-sm text-lg
-                focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-                disabled:bg-gray-100 disabled:cursor-not-allowed
-                transition-all duration-200 hover:shadow-md
-                ${validationError ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300'}
-              `}
-              autoComplete='organization'
-              maxLength={100}
-            />
-            <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none'>
-              <svg className='h-5 w-5 text-gray-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                <path
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  strokeWidth={2}
-                  d='M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'
-                />
+    <div className='w-full'>
+      <form onSubmit={handleSubmit} className='relative'>
+        <div className='relative'>
+          <input
+            type='text'
+            id='companyName'
+            name='companyName'
+            value={formData.companyName}
+            onChange={(e) => handleInputChange(e.target.value)}
+            onFocus={handleFocus}
+            placeholder='Start a message...'
+            disabled={loadingState.isLoading}
+            className={`
+              w-full px-4 py-4 pr-12 border border-gray-200 rounded-lg text-base
+              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+              disabled:bg-gray-50 disabled:cursor-not-allowed
+              transition-all duration-200
+              ${validationError ? 'border-red-300 focus:ring-red-500' : 'border-gray-200'}
+            `}
+            autoComplete='organization'
+            maxLength={100}
+          />
+          <button
+            type='submit'
+            disabled={loadingState.isLoading || !!validationError || !formData.companyName.trim()}
+            className={`
+              absolute right-2 top-1/2 transform -translate-y-1/2
+              w-8 h-8 rounded-md flex items-center justify-center
+              transition-all duration-200
+              ${
+                loadingState.isLoading || !!validationError || !formData.companyName.trim()
+                  ? 'bg-gray-200 cursor-not-allowed'
+                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+              }
+            `}
+          >
+            {loadingState.isLoading ? (
+              <div className='animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent'></div>
+            ) : (
+              <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 19l9 2-9-18-9 18 9-2zm0 0v-8' />
               </svg>
-            </div>
-          </div>
-
-          {/* Validation Error Display */}
-          {validationError && (
-            <div className='mt-3 p-3 bg-red-50 border border-red-200 rounded-lg'>
-              <p className='text-sm text-red-600 flex items-center'>
-                <svg className='w-4 h-4 mr-2 flex-shrink-0' fill='currentColor' viewBox='0 0 20 20'>
-                  <path
-                    fillRule='evenodd'
-                    d='M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z'
-                    clipRule='evenodd'
-                  />
-                </svg>
-                {validationError}
-              </p>
-            </div>
-          )}
-
-          {/* Character Counter and Tips */}
-          <div className='mt-2 flex justify-between items-center text-xs'>
-            <div className='text-gray-500'>{formData.companyName.length}/100 characters</div>
-            {!validationError && formData.companyName.length > 0 && (
-              <div className='text-green-600 flex items-center'>
-                <svg className='w-3 h-3 mr-1' fill='currentColor' viewBox='0 0 20 20'>
-                  <path
-                    fillRule='evenodd'
-                    d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.236 4.53L7.53 10.53a.75.75 0 00-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z'
-                    clipRule='evenodd'
-                  />
-                </svg>
-                Valid
-              </div>
             )}
-          </div>
+          </button>
         </div>
 
-        <button
-          type='submit'
-          disabled={loadingState.isLoading || !!validationError || !formData.companyName.trim()}
-          className={`
-            w-full py-4 px-6 rounded-xl font-semibold text-white text-lg
-            transition-all duration-200 flex items-center justify-center
-            transform hover:scale-[1.02] active:scale-[0.98]
-            ${
-              loadingState.isLoading || !!validationError || !formData.companyName.trim()
-                ? 'bg-gray-400 cursor-not-allowed transform-none'
-                : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
-            }
-          `}
-        >
-          {loadingState.isLoading ? (
-            <>
-              <div className='relative mr-3'>
-                <div className='animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent'></div>
-              </div>
-              {loadingState.message || 'Analyzing...'}
-            </>
-          ) : (
-            <>
-              <svg className='w-5 h-5 mr-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M13 10V3L4 14h7v7l9-11h-7z' />
-              </svg>
-              Analyze Company
-            </>
-          )}
-        </button>
+        {/* Validation Error Display */}
+        {validationError && <div className='mt-2 text-sm text-red-600'>{validationError}</div>}
       </form>
-
-      {/* Loading Message */}
-      {loadingState.isLoading && loadingState.message && (
-        <div className='mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl'>
-          <div className='flex items-center justify-center'>
-            <div className='animate-pulse flex items-center'>
-              <div className='flex space-x-1 mr-3'>
-                <div className='w-2 h-2 bg-blue-600 rounded-full animate-bounce'></div>
-                <div className='w-2 h-2 bg-blue-600 rounded-full animate-bounce' style={{ animationDelay: '0.1s' }}></div>
-                <div className='w-2 h-2 bg-blue-600 rounded-full animate-bounce' style={{ animationDelay: '0.2s' }}></div>
-              </div>
-              <p className='text-sm text-blue-700 font-medium'>{loadingState.message}</p>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
