@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getRecentSearches } from '@/lib/supabase';
 import { RecentSearchesResponse, RecentSearch } from '@/types';
 
@@ -7,7 +7,7 @@ import { RecentSearchesResponse, RecentSearch } from '@/types';
  * Retrieves the last 5 company analyses from the database
  * Returns company name, outsourcing likelihood, and analysis date
  */
-export async function GET(request: NextRequest): Promise<NextResponse<RecentSearchesResponse>> {
+export async function GET(): Promise<NextResponse<RecentSearchesResponse>> {
   try {
     // Fetch recent searches from database
     const result = await getRecentSearches();

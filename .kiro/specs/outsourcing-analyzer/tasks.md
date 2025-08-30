@@ -70,7 +70,7 @@
   - Implement fallback UI for missing company logo
   - _Requirements: 1.4, 2.1, 2.2, 2.3, 2.4, 2.5_
 
-- [ ] 10. Implement recent searches component
+- [x] 10. Implement recent searches component
 
   - Create RecentSearches component to display last 5 analyses in "Recent Searches" section
   - Show company name, outsourcing likelihood, and analysis date for each search

@@ -5,7 +5,7 @@ import { saveAnalysisResult, hasRecentAnalysis } from '@/lib/supabase';
 import { AnalyzeRequest, AnalyzeResponse, ErrorType, ValidationError } from '@/types';
 
 // Input validation function
-function validateAnalyzeRequest(body: any): { isValid: boolean; error?: ValidationError } {
+function validateAnalyzeRequest(body: unknown): { isValid: boolean; error?: ValidationError } {
   if (!body || typeof body !== 'object') {
     return {
       isValid: false,
@@ -18,7 +18,9 @@ function validateAnalyzeRequest(body: any): { isValid: boolean; error?: Validati
     };
   }
 
-  if (!body.companyName || typeof body.companyName !== 'string') {
+  const requestBody = body as Record<string, unknown>;
+
+  if (!requestBody.companyName || typeof requestBody.companyName !== 'string') {
     return {
       isValid: false,
       error: {
@@ -31,7 +33,7 @@ function validateAnalyzeRequest(body: any): { isValid: boolean; error?: Validati
     };
   }
 
-  const trimmedName = body.companyName.trim();
+  const trimmedName = requestBody.companyName.trim();
   if (trimmedName.length < 2) {
     return {
       isValid: false,
@@ -67,7 +69,7 @@ export async function POST(request: NextRequest) {
     let body: AnalyzeRequest;
     try {
       body = await request.json();
-    } catch (error) {
+    } catch {
       return NextResponse.json(
         {
           success: false,
@@ -125,11 +127,11 @@ export async function POST(request: NextRequest) {
     let analysisResult;
     try {
       analysisResult = await analyzeCompanyWithRetry(companyName, companyData);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error analyzing company with OpenAI:', error);
 
       // Handle specific OpenAI errors
-      if (error.type === ErrorType.RATE_LIMIT_ERROR) {
+      if (error && typeof error === 'object' && 'type' in error && error.type === ErrorType.RATE_LIMIT_ERROR) {
         return NextResponse.json(
           {
             success: false,
@@ -139,8 +141,8 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      if (error.type === ErrorType.OPENAI_API_ERROR) {
-        if (error.statusCode === 401) {
+      if (error && typeof error === 'object' && 'type' in error && error.type === ErrorType.OPENAI_API_ERROR) {
+        if ('statusCode' in error && error.statusCode === 401) {
           return NextResponse.json(
             {
               success: false,
@@ -150,7 +152,7 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        if (error.retryable) {
+        if ('retryable' in error && error.retryable) {
           return NextResponse.json(
             {
               success: false,

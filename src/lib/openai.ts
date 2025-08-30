@@ -176,30 +176,36 @@ Provide exactly 3-5 most relevant services they might outsource based on their i
 }
 
 // Validate the OpenAI response structure
-function validateAnalysisResponse(response: any): asserts response is OpenAIAnalysisResponse {
+function validateAnalysisResponse(response: unknown): asserts response is OpenAIAnalysisResponse {
   if (!response || typeof response !== 'object') {
     throw new Error('Invalid response format: Expected object');
   }
 
-  if (!['High', 'Medium', 'Low'].includes(response.outsourcingLikelihood)) {
+  const responseObj = response as Record<string, unknown>;
+
+  if (!['High', 'Medium', 'Low'].includes(responseObj.outsourcingLikelihood as string)) {
     throw new Error('Invalid outsourcingLikelihood: Must be High, Medium, or Low');
   }
 
-  if (!response.reasoning || typeof response.reasoning !== 'string' || response.reasoning.trim().length === 0) {
+  if (!responseObj.reasoning || typeof responseObj.reasoning !== 'string' || responseObj.reasoning.trim().length === 0) {
     throw new Error('Invalid reasoning: Must be a non-empty string');
   }
 
-  if (!Array.isArray(response.possibleServices) || response.possibleServices.length === 0) {
+  if (!Array.isArray(responseObj.possibleServices) || responseObj.possibleServices.length === 0) {
     throw new Error('Invalid possibleServices: Must be a non-empty array');
   }
 
-  if (response.possibleServices.some((service: any) => typeof service !== 'string' || service.trim().length === 0)) {
+  if (
+    responseObj.possibleServices.some(
+      (service: unknown) => typeof service !== 'string' || (service as string).trim().length === 0
+    )
+  ) {
     throw new Error('Invalid possibleServices: All services must be non-empty strings');
   }
 
   if (
-    response.confidence !== undefined &&
-    (typeof response.confidence !== 'number' || response.confidence < 0 || response.confidence > 100)
+    responseObj.confidence !== undefined &&
+    (typeof responseObj.confidence !== 'number' || responseObj.confidence < 0 || responseObj.confidence > 100)
   ) {
     throw new Error('Invalid confidence: Must be a number between 0 and 100');
   }
