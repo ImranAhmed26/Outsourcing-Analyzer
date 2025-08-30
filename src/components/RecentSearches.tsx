@@ -13,20 +13,6 @@ export default function RecentSearches({ className = '', refreshTrigger }: Recen
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>('');
 
-  // Get badge color based on outsourcing likelihood
-  const getBadgeColor = (likelihood: 'High' | 'Medium' | 'Low') => {
-    switch (likelihood) {
-      case 'High':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'Medium':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'Low':
-        return 'bg-red-100 text-red-800 border-red-200';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
-
   // Format date for display
   const formatDate = (date: Date) => {
     const now = new Date();
@@ -193,7 +179,7 @@ export default function RecentSearches({ className = '', refreshTrigger }: Recen
       {/* Recent searches list - styled like OpenRouter models */}
       {!error && recentSearches.length > 0 && (
         <div className='space-y-3'>
-          {recentSearches.map((search, index) => (
+          {recentSearches.map((search) => (
             <div
               key={search.id}
               className='group border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors cursor-pointer'

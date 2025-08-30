@@ -12,20 +12,6 @@ interface AnalysisCardProps {
 export default function AnalysisCard({ analysis, className = '' }: AnalysisCardProps) {
   const [logoError, setLogoError] = useState(false);
 
-  // Get badge color based on outsourcing likelihood
-  const getBadgeColor = (likelihood: 'High' | 'Medium' | 'Low') => {
-    switch (likelihood) {
-      case 'High':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'Medium':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'Low':
-        return 'bg-red-100 text-red-800 border-red-200';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
-
   // Format date for display
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('en-US', {

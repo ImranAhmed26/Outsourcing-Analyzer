@@ -223,6 +223,14 @@ export interface DatabaseCompanyResult {
     possibleServices: string[];
     logoUrl?: string;
     confidence?: number;
+    keyInsights?: string[];
+    riskFactors?: string[];
+    opportunities?: string[];
+    recentActivity?: {
+      newsCount: number;
+      jobPostingsCount: number;
+      hiringTrends: string;
+    };
   };
   created_at: string;
 }
@@ -253,7 +261,7 @@ export interface ValidationError extends AppError {
 
 export interface ExternalApiError extends AppError {
   type: ErrorType.EXTERNAL_API_ERROR;
-  apiName: 'DuckDuckGo' | 'Wikipedia' | 'Clearbit' | 'OpenAI';
+  apiName: 'DuckDuckGo' | 'Wikipedia' | 'Clearbit' | 'OpenAI' | 'NewsAPI' | 'LinkedIn' | 'Indeed' | 'Glassdoor';
   statusCode: number;
 }
 

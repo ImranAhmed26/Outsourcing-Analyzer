@@ -1,15 +1,5 @@
-import {
-  CompanyData,
-  NewsItem,
-  JobPosting,
-  KeyPerson,
-  WebsiteContent,
-  SocialMediaData,
-  FinancialData,
-  ExternalApiError,
-  ErrorType,
-} from '@/types';
-import { fetchWithTimeout, createExternalApiError, retryExternalApiCall } from './external-apis';
+import { CompanyData, NewsItem, JobPosting, KeyPerson, WebsiteContent, SocialMediaData } from '@/types';
+import { fetchWithTimeout, createExternalApiError } from './external-apis';
 
 // Configuration constants
 const NEWS_API_TIMEOUT = 15000; // 15 seconds for news APIs
@@ -39,14 +29,23 @@ export async function fetchCompanyNews(companyName: string): Promise<NewsItem[]>
     const data = await response.json();
 
     return (
-      data.articles?.map((article: any) => ({
-        title: article.title,
-        summary: article.description || article.content?.substring(0, 200) + '...',
-        url: article.url,
-        publishedAt: article.publishedAt,
-        source: article.source.name,
-        sentiment: analyzeSentiment(article.title + ' ' + article.description),
-      })) || []
+      data.articles?.map(
+        (article: {
+          title: string;
+          description?: string;
+          content?: string;
+          url: string;
+          publishedAt: string;
+          source: { name: string };
+        }) => ({
+          title: article.title,
+          summary: article.description || article.content?.substring(0, 200) + '...',
+          url: article.url,
+          publishedAt: article.publishedAt,
+          source: article.source.name,
+          sentiment: analyzeSentiment(article.title + ' ' + article.description),
+        })
+      ) || []
     );
   } catch (error) {
     console.warn('Failed to fetch company news:', error);
@@ -57,7 +56,7 @@ export async function fetchCompanyNews(companyName: string): Promise<NewsItem[]>
 /**
  * Fetches job postings from multiple sources
  */
-export async function fetchJobPostings(companyName: string, website?: string): Promise<JobPosting[]> {
+export async function fetchJobPostings(companyName: string, _website?: string): Promise<JobPosting[]> {
   const jobPostings: JobPosting[] = [];
 
   // Try multiple job sources
@@ -253,37 +252,39 @@ function predictEmailAddress(name: string, website: string): string {
 
 // Placeholder functions for external APIs (would need real API keys in production)
 
-async function fetchJobsFromLinkedIn(companyName: string): Promise<JobPosting[]> {
+async function fetchJobsFromLinkedIn(_companyName: string): Promise<JobPosting[]> {
   // In production, this would use LinkedIn Jobs API
   return [];
 }
 
-async function fetchJobsFromIndeed(companyName: string): Promise<JobPosting[]> {
+async function fetchJobsFromIndeed(_companyName: string): Promise<JobPosting[]> {
   // In production, this would use Indeed API or scraping
   return [];
 }
 
-async function fetchJobsFromGlassdoor(companyName: string): Promise<JobPosting[]> {
+async function fetchJobsFromGlassdoor(_companyName: string): Promise<JobPosting[]> {
   // In production, this would use Glassdoor API
   return [];
 }
 
-async function fetchLinkedInPeople(companyName: string): Promise<KeyPerson[]> {
+async function fetchLinkedInPeople(_companyName: string): Promise<KeyPerson[]> {
   // In production, this would use LinkedIn People API
   return [];
 }
 
-async function fetchWebsitePeople(website: string): Promise<KeyPerson[]> {
+async function fetchWebsitePeople(_website: string): Promise<KeyPerson[]> {
   // In production, this would scrape team/about pages
   return [];
 }
 
-async function fetchLinkedInCompanyData(companyName: string): Promise<any> {
+async function fetchLinkedInCompanyData(
+  _companyName: string
+): Promise<{ followers: number; employees: number; industry: string } | null> {
   // In production, this would use LinkedIn Company API
   return null;
 }
 
-async function fetchTwitterData(companyName: string): Promise<any> {
+async function fetchTwitterData(_companyName: string): Promise<{ followers: number; handle: string } | null> {
   // In production, this would use Twitter API
   return null;
 }
@@ -318,15 +319,15 @@ export async function fetchEnhancedCompanyData(companyName: string, basicData: C
 
   // Process results
   if (results[0].status === 'fulfilled') {
-    enhancedData.recentNews = results[0].value;
+    enhancedData.recentNews = results[0].value as NewsItem[];
   }
 
   if (results[1].status === 'fulfilled') {
-    enhancedData.jobPostings = results[1].value;
+    enhancedData.jobPostings = results[1].value as JobPosting[];
   }
 
   if (results[2].status === 'fulfilled') {
-    enhancedData.keyPeople = results[2].value;
+    enhancedData.keyPeople = results[2].value as KeyPerson[];
   }
 
   if (results[3].status === 'fulfilled') {

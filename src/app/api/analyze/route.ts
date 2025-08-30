@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { fetchCompanyData } from '@/lib/external-apis';
 import { analyzeCompanyWithRetry } from '@/lib/openai';
 import { saveAnalysisResult, hasRecentAnalysis } from '@/lib/supabase';
-import { AnalyzeRequest, AnalyzeResponse, ErrorType, ValidationError } from '@/types';
+import { AnalyzeRequest, AnalyzeResponse, ErrorType, ValidationError, DatabaseCompanyResult } from '@/types';
 
 // Input validation function
 function validateAnalyzeRequest(body: unknown): { isValid: boolean; error?: ValidationError } {
@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
       recentActivity: {
         newsCount: enhancedCompanyData.recentNews?.length || 0,
         jobPostingsCount: enhancedCompanyData.jobPostings?.length || 0,
-        hiringTrends: enhancedCompanyData.jobPostings?.length > 5 ? 'Active hiring' : 'Limited hiring',
+        hiringTrends: (enhancedCompanyData.jobPostings?.length || 0) > 5 ? 'Active hiring' : 'Limited hiring',
       },
     };
 
@@ -225,7 +225,7 @@ export async function POST(request: NextRequest) {
             recentActivity: {
               newsCount: enhancedCompanyData.recentNews?.length || 0,
               jobPostingsCount: enhancedCompanyData.jobPostings?.length || 0,
-              hiringTrends: enhancedCompanyData.jobPostings?.length > 5 ? 'Active hiring' : 'Limited hiring',
+              hiringTrends: (enhancedCompanyData.jobPostings?.length || 0) > 5 ? 'Active hiring' : 'Limited hiring',
             },
           },
           warning: 'Analysis completed but could not be saved to history.',
@@ -254,7 +254,7 @@ export async function POST(request: NextRequest) {
           recentActivity: {
             newsCount: enhancedCompanyData.recentNews?.length || 0,
             jobPostingsCount: enhancedCompanyData.jobPostings?.length || 0,
-            hiringTrends: enhancedCompanyData.jobPostings?.length > 5 ? 'Active hiring' : 'Limited hiring',
+            hiringTrends: (enhancedCompanyData.jobPostings?.length || 0) > 5 ? 'Active hiring' : 'Limited hiring',
           },
         },
         warning: 'Analysis completed but could not be saved to history.',
@@ -270,12 +270,12 @@ export async function POST(request: NextRequest) {
       possibleServices: savedResult.analysis.possibleServices,
       logoUrl: savedResult.analysis.logoUrl,
       createdAt: new Date(savedResult.created_at),
-      confidence: savedResult.analysis.confidence || 0,
-      keyInsights: savedResult.analysis.keyInsights || [],
-      riskFactors: savedResult.analysis.riskFactors || [],
-      opportunities: savedResult.analysis.opportunities || [],
+      confidence: (savedResult.analysis as DatabaseCompanyResult['analysis']).confidence || 0,
+      keyInsights: (savedResult.analysis as DatabaseCompanyResult['analysis']).keyInsights || [],
+      riskFactors: (savedResult.analysis as DatabaseCompanyResult['analysis']).riskFactors || [],
+      opportunities: (savedResult.analysis as DatabaseCompanyResult['analysis']).opportunities || [],
       keyPeople: enhancedCompanyData.keyPeople || [],
-      recentActivity: savedResult.analysis.recentActivity || {
+      recentActivity: (savedResult.analysis as DatabaseCompanyResult['analysis']).recentActivity || {
         newsCount: 0,
         jobPostingsCount: 0,
         hiringTrends: 'No data',
