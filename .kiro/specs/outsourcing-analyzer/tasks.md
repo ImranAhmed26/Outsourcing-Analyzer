@@ -46,7 +46,7 @@
   - Include proper HTTP status codes and error responses
   - _Requirements: 1.2, 1.3, 1.4, 3.1, 5.5_
 
-- [-] 7. Create recent searches API endpoint
+- [x] 7. Create recent searches API endpoint
 
   - Build GET /api/recent route to retrieve last 5 searches from company_results table
   - Implement sorting by created_at date in descending order
@@ -54,7 +54,7 @@
   - Include proper error handling for database failures
   - _Requirements: 3.2, 3.3_
 
-- [ ] 8. Build company input form component
+- [x] 8. Build company input form component
 
   - Create CompanyForm component with input validation
   - Add form submission handling with loading states
@@ -62,7 +62,7 @@
   - Add debouncing to prevent excessive API calls
   - _Requirements: 1.1, 4.2, 4.3_
 
-- [ ] 9. Create analysis result display component
+- [-] 9. Create analysis result display component
 
   - Build AnalysisCard component to display company analysis results
   - Include company logo, name, and colored badge for High/Medium/Low likelihood (green/yellow/red)
