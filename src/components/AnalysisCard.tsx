@@ -43,34 +43,26 @@ export default function AnalysisCard({ analysis, className = '' }: AnalysisCardP
   };
 
   return (
-    <div
-      className={`bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200/50 p-6 lg:p-8 card-hover ${className}`}
-    >
+    <div className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}>
       {/* Header with logo and company name */}
-      <div className='flex items-start space-x-4 lg:space-x-6 mb-6'>
+      <div className='flex items-start space-x-4 mb-6'>
         {/* Company Logo */}
         <div className='flex-shrink-0'>
           {analysis.logoUrl && !logoError ? (
-            <div className='relative w-16 h-16 lg:w-20 lg:h-20 rounded-xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200'>
+            <div className='relative w-12 h-12 rounded-lg overflow-hidden bg-gray-50 border border-gray-200'>
               <Image
                 src={analysis.logoUrl}
                 alt={`${analysis.companyName} logo`}
                 fill
-                className='object-contain p-2 lg:p-3'
+                className='object-contain p-2'
                 onError={handleLogoError}
-                sizes='(max-width: 768px) 64px, 80px'
+                sizes='48px'
               />
             </div>
           ) : (
             // Fallback logo placeholder
-            <div className='w-16 h-16 lg:w-20 lg:h-20 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 border border-gray-200 flex items-center justify-center shadow-sm'>
-              <svg
-                className='w-8 h-8 lg:w-10 lg:h-10 text-gray-400'
-                fill='none'
-                stroke='currentColor'
-                viewBox='0 0 24 24'
-                xmlns='http://www.w3.org/2000/svg'
-              >
+            <div className='w-12 h-12 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center'>
+              <svg className='w-6 h-6 text-gray-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                 <path
                   strokeLinecap='round'
                   strokeLinejoin='round'
@@ -84,107 +76,145 @@ export default function AnalysisCard({ analysis, className = '' }: AnalysisCardP
 
         {/* Company name and likelihood badge */}
         <div className='flex-1 min-w-0'>
-          <h3 className='text-xl lg:text-2xl font-bold text-gray-900 truncate mb-3'>{analysis.companyName}</h3>
-          <div className='flex flex-col sm:flex-row sm:items-center sm:space-x-3 space-y-2 sm:space-y-0'>
+          <h3 className='text-lg font-semibold text-gray-900 mb-2'>{analysis.companyName}</h3>
+          <div className='flex items-center space-x-3'>
             <span
-              className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold border-2 shadow-sm ${getBadgeColor(
-                analysis.outsourcingLikelihood
-              )}`}
+              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                analysis.outsourcingLikelihood === 'High'
+                  ? 'bg-green-100 text-green-800'
+                  : analysis.outsourcingLikelihood === 'Medium'
+                  ? 'bg-yellow-100 text-yellow-800'
+                  : 'bg-red-100 text-red-800'
+              }`}
             >
-              <div
-                className={`w-2 h-2 rounded-full mr-2 ${
-                  analysis.outsourcingLikelihood === 'High'
-                    ? 'bg-green-500'
-                    : analysis.outsourcingLikelihood === 'Medium'
-                    ? 'bg-yellow-500'
-                    : 'bg-red-500'
-                }`}
-              ></div>
               {analysis.outsourcingLikelihood} Likelihood
             </span>
-            <div className='flex items-center text-sm text-gray-500'>
-              <svg className='w-4 h-4 mr-1' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                <path
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  strokeWidth={2}
-                  d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'
-                />
-              </svg>
-              {formatDate(analysis.createdAt)}
-            </div>
+            <span className='text-sm text-gray-500'>{formatDate(analysis.createdAt)}</span>
           </div>
         </div>
       </div>
 
       {/* Analysis reasoning */}
       <div className='mb-6'>
-        <div className='flex items-center mb-3'>
-          <svg className='w-5 h-5 text-blue-600 mr-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-            <path
-              strokeLinecap='round'
-              strokeLinejoin='round'
-              strokeWidth={2}
-              d='M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z'
-            />
-          </svg>
-          <h4 className='text-lg font-semibold text-gray-800'>AI Analysis</h4>
+        <div className='flex items-center justify-between mb-2'>
+          <h4 className='text-sm font-medium text-gray-900'>Analysis</h4>
+          {analysis.confidence && <span className='text-xs text-gray-500'>{analysis.confidence}% confidence</span>}
         </div>
-        <div className='bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border-l-4 border-blue-500'>
-          <p className='text-gray-700 leading-relaxed text-sm lg:text-base'>{analysis.reasoning}</p>
-        </div>
+        <p className='text-sm text-gray-600 leading-relaxed'>{analysis.reasoning}</p>
       </div>
+
+      {/* Key Insights */}
+      {analysis.keyInsights && analysis.keyInsights.length > 0 && (
+        <div className='mb-6'>
+          <h4 className='text-sm font-medium text-gray-900 mb-2'>Key Insights</h4>
+          <ul className='space-y-1'>
+            {analysis.keyInsights.map((insight, index) => (
+              <li key={index} className='text-xs text-gray-600 flex items-start'>
+                <span className='w-1 h-1 bg-blue-500 rounded-full mt-2 mr-2 flex-shrink-0'></span>
+                {insight}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Recent Activity */}
+      {analysis.recentActivity && (
+        <div className='mb-6'>
+          <h4 className='text-sm font-medium text-gray-900 mb-2'>Recent Activity</h4>
+          <div className='grid grid-cols-3 gap-4 text-center'>
+            <div className='bg-gray-50 rounded-lg p-2'>
+              <div className='text-lg font-semibold text-gray-900'>{analysis.recentActivity.newsCount}</div>
+              <div className='text-xs text-gray-500'>News Articles</div>
+            </div>
+            <div className='bg-gray-50 rounded-lg p-2'>
+              <div className='text-lg font-semibold text-gray-900'>{analysis.recentActivity.jobPostingsCount}</div>
+              <div className='text-xs text-gray-500'>Job Postings</div>
+            </div>
+            <div className='bg-gray-50 rounded-lg p-2'>
+              <div className='text-xs font-medium text-gray-700'>{analysis.recentActivity.hiringTrends}</div>
+              <div className='text-xs text-gray-500'>Hiring Status</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Key People */}
+      {analysis.keyPeople && analysis.keyPeople.length > 0 && (
+        <div className='mb-6'>
+          <h4 className='text-sm font-medium text-gray-900 mb-2'>Key People</h4>
+          <div className='space-y-2'>
+            {analysis.keyPeople.slice(0, 3).map((person, index) => (
+              <div key={index} className='flex items-center justify-between p-2 bg-gray-50 rounded-lg'>
+                <div>
+                  <div className='text-sm font-medium text-gray-900'>{person.name}</div>
+                  <div className='text-xs text-gray-500'>{person.title}</div>
+                </div>
+                {(person.email || person.predictedEmail) && (
+                  <div className='text-xs text-blue-600 font-mono'>
+                    {person.email || person.predictedEmail}
+                    {person.predictedEmail && !person.email && <span className='text-gray-400 ml-1'>(predicted)</span>}
+                  </div>
+                )}
+              </div>
+            ))}
+            {analysis.keyPeople.length > 3 && (
+              <div className='text-xs text-gray-500 text-center'>+{analysis.keyPeople.length - 3} more people</div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Possible services to outsource */}
       {analysis.possibleServices && analysis.possibleServices.length > 0 && (
         <div className='mb-6'>
-          <div className='flex items-center mb-3'>
-            <svg className='w-5 h-5 text-purple-600 mr-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-              <path
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                strokeWidth={2}
-                d='M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'
-              />
-            </svg>
-            <h4 className='text-lg font-semibold text-gray-800'>Potential Outsourcing Services</h4>
-          </div>
-          <div className='grid grid-cols-1 sm:grid-cols-2 gap-2'>
+          <h4 className='text-sm font-medium text-gray-900 mb-2'>Potential Services</h4>
+          <div className='flex flex-wrap gap-2'>
             {analysis.possibleServices.map((service, index) => (
-              <div
+              <span
                 key={index}
-                className='group flex items-center px-3 py-2 rounded-lg text-sm font-medium bg-gradient-to-r from-purple-50 to-pink-50 text-purple-700 border border-purple-200 hover:from-purple-100 hover:to-pink-100 transition-all duration-200 hover:shadow-sm'
+                className='inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-700'
               >
-                <svg className='w-4 h-4 mr-2 text-purple-500 group-hover:text-purple-600' fill='currentColor' viewBox='0 0 20 20'>
-                  <path
-                    fillRule='evenodd'
-                    d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.236 4.53L7.53 10.53a.75.75 0 00-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z'
-                    clipRule='evenodd'
-                  />
-                </svg>
                 {service}
-              </div>
+              </span>
             ))}
           </div>
         </div>
       )}
 
-      {/* Analysis ID for reference (hidden by default, useful for debugging) */}
-      <div className='mt-6 pt-4 border-t border-gray-100'>
-        <div className='flex justify-between items-center'>
-          <p className='text-xs text-gray-400'>Analysis ID: {analysis.id}</p>
-          <div className='flex items-center text-xs text-gray-500'>
-            <svg className='w-3 h-3 mr-1 text-green-500' fill='currentColor' viewBox='0 0 20 20'>
-              <path
-                fillRule='evenodd'
-                d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.236 4.53L7.53 10.53a.75.75 0 00-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z'
-                clipRule='evenodd'
-              />
-            </svg>
-            Verified Analysis
-          </div>
+      {/* Risk Factors and Opportunities */}
+      {((analysis.riskFactors && analysis.riskFactors.length > 0) ||
+        (analysis.opportunities && analysis.opportunities.length > 0)) && (
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          {analysis.riskFactors && analysis.riskFactors.length > 0 && (
+            <div>
+              <h4 className='text-sm font-medium text-red-700 mb-2'>Risk Factors</h4>
+              <ul className='space-y-1'>
+                {analysis.riskFactors.map((risk, index) => (
+                  <li key={index} className='text-xs text-red-600 flex items-start'>
+                    <span className='w-1 h-1 bg-red-500 rounded-full mt-2 mr-2 flex-shrink-0'></span>
+                    {risk}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {analysis.opportunities && analysis.opportunities.length > 0 && (
+            <div>
+              <h4 className='text-sm font-medium text-green-700 mb-2'>Opportunities</h4>
+              <ul className='space-y-1'>
+                {analysis.opportunities.map((opportunity, index) => (
+                  <li key={index} className='text-xs text-green-600 flex items-start'>
+                    <span className='w-1 h-1 bg-green-500 rounded-full mt-2 mr-2 flex-shrink-0'></span>
+                    {opportunity}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
-      </div>
+      )}
     </div>
   );
 }

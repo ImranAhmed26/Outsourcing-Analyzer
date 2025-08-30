@@ -108,26 +108,33 @@ export async function POST(request: NextRequest) {
       console.warn('Failed to check recent analysis, proceeding with fresh analysis:', error);
     }
 
-    // Step 1: Fetch company data from external APIs with graceful degradation
-    let companyData;
+    // Step 1: Fetch basic company data from external APIs
+    let basicCompanyData;
     try {
-      companyData = await fetchCompanyData(companyName);
+      basicCompanyData = await fetchCompanyData(companyName);
     } catch (error) {
-      console.error('Error fetching company data:', error);
-
-      // Instead of failing completely, provide minimal company data and continue
-      // This implements graceful degradation as required
-      console.log('Proceeding with minimal company data due to external API failures');
-      companyData = {
+      console.error('Error fetching basic company data:', error);
+      basicCompanyData = {
         name: companyName,
         description: `Analysis for ${companyName} (limited data available due to external service issues)`,
       };
     }
 
-    // Step 2: Analyze with OpenAI
+    // Step 1.5: Fetch enhanced company data (news, jobs, people, etc.)
+    let enhancedCompanyData;
+    try {
+      const { fetchEnhancedCompanyData } = await import('@/lib/enhanced-apis');
+      enhancedCompanyData = await fetchEnhancedCompanyData(companyName, basicCompanyData);
+      console.log(`Enhanced data collected for ${companyName}`);
+    } catch (error) {
+      console.error('Error fetching enhanced company data:', error);
+      enhancedCompanyData = basicCompanyData; // Fallback to basic data
+    }
+
+    // Step 2: Analyze with OpenAI using enhanced data
     let analysisResult;
     try {
-      analysisResult = await analyzeCompanyWithRetry(companyName, companyData);
+      analysisResult = await analyzeCompanyWithRetry(companyName, enhancedCompanyData);
     } catch (error: unknown) {
       console.error('Error analyzing company with OpenAI:', error);
 
@@ -173,12 +180,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Step 3: Prepare analysis data for saving
+    // Step 3: Prepare enhanced analysis data for saving
     const analysisData = {
       outsourcingLikelihood: analysisResult.outsourcingLikelihood,
       reasoning: analysisResult.reasoning,
       possibleServices: analysisResult.possibleServices,
-      logoUrl: companyData.logoUrl,
+      logoUrl: enhancedCompanyData.logoUrl,
+      confidence: analysisResult.confidence,
+      keyInsights: analysisResult.keyInsights || [],
+      riskFactors: analysisResult.riskFactors || [],
+      opportunities: analysisResult.opportunities || [],
+      // Enhanced activity data
+      recentActivity: {
+        newsCount: enhancedCompanyData.recentNews?.length || 0,
+        jobPostingsCount: enhancedCompanyData.jobPostings?.length || 0,
+        hiringTrends: enhancedCompanyData.jobPostings?.length > 5 ? 'Active hiring' : 'Limited hiring',
+      },
     };
 
     // Step 4: Save to database
@@ -198,8 +215,18 @@ export async function POST(request: NextRequest) {
             outsourcingLikelihood: analysisResult.outsourcingLikelihood,
             reasoning: analysisResult.reasoning,
             possibleServices: analysisResult.possibleServices,
-            logoUrl: companyData.logoUrl,
+            logoUrl: enhancedCompanyData.logoUrl,
             createdAt: new Date(),
+            confidence: analysisResult.confidence,
+            keyInsights: analysisResult.keyInsights || [],
+            riskFactors: analysisResult.riskFactors || [],
+            opportunities: analysisResult.opportunities || [],
+            keyPeople: enhancedCompanyData.keyPeople || [],
+            recentActivity: {
+              newsCount: enhancedCompanyData.recentNews?.length || 0,
+              jobPostingsCount: enhancedCompanyData.jobPostings?.length || 0,
+              hiringTrends: enhancedCompanyData.jobPostings?.length > 5 ? 'Active hiring' : 'Limited hiring',
+            },
           },
           warning: 'Analysis completed but could not be saved to history.',
         } as AnalyzeResponse & { warning: string });
@@ -217,14 +244,24 @@ export async function POST(request: NextRequest) {
           outsourcingLikelihood: analysisResult.outsourcingLikelihood,
           reasoning: analysisResult.reasoning,
           possibleServices: analysisResult.possibleServices,
-          logoUrl: companyData.logoUrl,
+          logoUrl: enhancedCompanyData.logoUrl,
           createdAt: new Date(),
+          confidence: analysisResult.confidence,
+          keyInsights: analysisResult.keyInsights || [],
+          riskFactors: analysisResult.riskFactors || [],
+          opportunities: analysisResult.opportunities || [],
+          keyPeople: enhancedCompanyData.keyPeople || [],
+          recentActivity: {
+            newsCount: enhancedCompanyData.recentNews?.length || 0,
+            jobPostingsCount: enhancedCompanyData.jobPostings?.length || 0,
+            hiringTrends: enhancedCompanyData.jobPostings?.length > 5 ? 'Active hiring' : 'Limited hiring',
+          },
         },
         warning: 'Analysis completed but could not be saved to history.',
       } as AnalyzeResponse & { warning: string });
     }
 
-    // Step 5: Return successful result
+    // Step 5: Return successful result with enhanced data
     const finalResult = {
       id: savedResult.id,
       companyName: savedResult.company_name,
@@ -233,6 +270,16 @@ export async function POST(request: NextRequest) {
       possibleServices: savedResult.analysis.possibleServices,
       logoUrl: savedResult.analysis.logoUrl,
       createdAt: new Date(savedResult.created_at),
+      confidence: savedResult.analysis.confidence || 0,
+      keyInsights: savedResult.analysis.keyInsights || [],
+      riskFactors: savedResult.analysis.riskFactors || [],
+      opportunities: savedResult.analysis.opportunities || [],
+      keyPeople: enhancedCompanyData.keyPeople || [],
+      recentActivity: savedResult.analysis.recentActivity || {
+        newsCount: 0,
+        jobPostingsCount: 0,
+        hiringTrends: 'No data',
+      },
     };
 
     return NextResponse.json({

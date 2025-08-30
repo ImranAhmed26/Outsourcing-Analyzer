@@ -9,7 +9,7 @@ const WIKIPEDIA_API_URL = 'https://en.wikipedia.org/api/rest_v1/page/summary';
 /**
  * Creates a fetch request with timeout
  */
-async function fetchWithTimeout(url: string, options: RequestInit = {}, timeout = API_TIMEOUT): Promise<Response> {
+export async function fetchWithTimeout(url: string, options: RequestInit = {}, timeout = API_TIMEOUT): Promise<Response> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
@@ -32,8 +32,8 @@ async function fetchWithTimeout(url: string, options: RequestInit = {}, timeout 
 /**
  * Creates a standardized external API error
  */
-function createExternalApiError(
-  apiName: 'DuckDuckGo' | 'Wikipedia' | 'Clearbit',
+export function createExternalApiError(
+  apiName: 'DuckDuckGo' | 'Wikipedia' | 'Clearbit' | 'NewsAPI' | 'LinkedIn' | 'Indeed' | 'Glassdoor',
   message: string,
   statusCode: number = 500,
   details?: string

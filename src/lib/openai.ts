@@ -138,40 +138,96 @@ export async function analyzeCompanyOutsourcing(companyName: string, companyData
   }
 }
 
-// Create structured prompt for outsourcing analysis
+// Create enhanced structured prompt for outsourcing analysis
 function createAnalysisPrompt(companyName: string, companyData: CompanyData): string {
+  // Build enhanced context from available data
+  let enhancedContext = '';
+
+  if (companyData.recentNews && companyData.recentNews.length > 0) {
+    enhancedContext += `\nRecent News (${companyData.recentNews.length} articles):\n`;
+    companyData.recentNews.slice(0, 3).forEach((news) => {
+      enhancedContext += `- ${news.title} (${news.source}, ${news.sentiment})\n`;
+    });
+  }
+
+  if (companyData.jobPostings && companyData.jobPostings.length > 0) {
+    enhancedContext += `\nRecent Job Postings (${companyData.jobPostings.length} positions):\n`;
+    const departments = [...new Set(companyData.jobPostings.map((job) => job.department))];
+    enhancedContext += `- Active hiring in: ${departments.join(', ')}\n`;
+    const outsourcingJobs = companyData.jobPostings.filter((job) => job.isOutsourcingRelated);
+    if (outsourcingJobs.length > 0) {
+      enhancedContext += `- ${outsourcingJobs.length} outsourcing-related positions found\n`;
+    }
+  }
+
+  if (companyData.keyPeople && companyData.keyPeople.length > 0) {
+    enhancedContext += `\nKey Personnel:\n`;
+    const cLevel = companyData.keyPeople.filter((p) => p.seniority === 'C-Level');
+    const departments = [...new Set(companyData.keyPeople.map((p) => p.department).filter(Boolean))];
+    enhancedContext += `- ${cLevel.length} C-level executives identified\n`;
+    if (departments.length > 0) {
+      enhancedContext += `- Key departments: ${departments.join(', ')}\n`;
+    }
+  }
+
+  if (companyData.websiteContent) {
+    const content = companyData.websiteContent;
+    if (content.services && content.services.length > 0) {
+      enhancedContext += `\nServices Offered: ${content.services.join(', ')}\n`;
+    }
+    if (content.technologies && content.technologies.length > 0) {
+      enhancedContext += `\nTechnologies Used: ${content.technologies.join(', ')}\n`;
+    }
+  }
+
+  if (companyData.socialMedia?.linkedin) {
+    enhancedContext += `\nLinkedIn Data:\n`;
+    enhancedContext += `- ${companyData.socialMedia.linkedin.employees} employees\n`;
+    enhancedContext += `- Industry: ${companyData.socialMedia.linkedin.industry}\n`;
+  }
+
   return `
-Analyze the following company for their likelihood to outsource services. Consider factors such as company size, industry, business model, cost structure, and current market trends.
+Analyze the following company for their likelihood to outsource services. Use the comprehensive data provided to make an informed assessment.
 
 Company Information:
 - Name: ${companyName}
 - Description: ${companyData.description || 'Not available'}
 - Industry: ${companyData.industry || 'Not specified'}
 - Website: ${companyData.website || 'Not available'}
+${enhancedContext}
 
 Please provide your analysis in the following JSON format:
 {
   "outsourcingLikelihood": "High" | "Medium" | "Low",
-  "reasoning": "1-2 sentence explanation of why this company would or would not outsource services",
+  "reasoning": "2-3 sentence explanation based on the data provided",
   "possibleServices": ["service1", "service2", "service3"],
-  "confidence": 85
+  "confidence": 85,
+  "keyInsights": ["insight1", "insight2", "insight3"],
+  "riskFactors": ["risk1", "risk2"],
+  "opportunities": ["opportunity1", "opportunity2"]
 }
 
-Analysis Guidelines:
-- High: Companies with clear cost pressures, non-core functions, or industries known for outsourcing
-- Medium: Companies that might outsource some functions but have mixed indicators
-- Low: Companies likely to keep most functions in-house due to security, control, or strategic reasons
+Enhanced Analysis Guidelines:
+- Use recent news sentiment and content to gauge company stability and growth
+- Consider job posting patterns (rapid hiring may indicate growth, specific roles may indicate outsourcing needs)
+- Analyze key personnel structure (lean C-suite may indicate outsourcing preference)
+- Factor in technology stack and services offered
+- Consider company size indicators from social media data
 
-Consider these factors:
-1. Industry trends (tech companies often outsource customer support, manufacturing companies outsource logistics)
-2. Company size (larger companies more likely to outsource non-core functions)
-3. Business model (service companies vs. product companies)
-4. Cost optimization needs
-5. Regulatory requirements that might prevent outsourcing
+Key Insights should include:
+- Notable patterns from recent news or hiring
+- Technology or service indicators
+- Market position indicators
 
-Possible services to consider: Customer Support, IT Services, Accounting/Finance, Human Resources, Marketing, Manufacturing, Logistics, Data Entry, Software Development, Legal Services, Facilities Management.
+Risk Factors should include:
+- Potential barriers to outsourcing (regulatory, security, etc.)
+- Company characteristics that suggest in-house preference
 
-Provide exactly 3-5 most relevant services they might outsource based on their industry and business model.
+Opportunities should include:
+- Specific outsourcing scenarios that make sense
+- Market conditions that favor outsourcing
+
+Provide exactly 3-5 most relevant services they might outsource based on all available data.
 `;
 }
 
@@ -208,6 +264,25 @@ function validateAnalysisResponse(response: unknown): asserts response is OpenAI
     (typeof responseObj.confidence !== 'number' || responseObj.confidence < 0 || responseObj.confidence > 100)
   ) {
     throw new Error('Invalid confidence: Must be a number between 0 and 100');
+  }
+
+  // Validate enhanced fields (optional)
+  if (responseObj.keyInsights !== undefined) {
+    if (!Array.isArray(responseObj.keyInsights)) {
+      throw new Error('Invalid keyInsights: Must be an array');
+    }
+  }
+
+  if (responseObj.riskFactors !== undefined) {
+    if (!Array.isArray(responseObj.riskFactors)) {
+      throw new Error('Invalid riskFactors: Must be an array');
+    }
+  }
+
+  if (responseObj.opportunities !== undefined) {
+    if (!Array.isArray(responseObj.opportunities)) {
+      throw new Error('Invalid opportunities: Must be an array');
+    }
   }
 }
 
