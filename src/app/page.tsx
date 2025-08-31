@@ -1,192 +1,316 @@
-'use client';
-
-import { useState } from 'react';
-import { AnalysisResult, LoadingState } from '@/types';
-import CompanyForm from '@/components/CompanyForm';
-import AnalysisCard from '@/components/AnalysisCard';
-import RecentSearches from '@/components/RecentSearches';
-
-import ErrorBoundary from '@/components/ErrorBoundary';
+"use client";
+import { FAQSection } from "@/components/faq-section";
+import Features from "@/components/features";
+import Hero from "@/components/home/hero";
+import { NewReleasePromo } from "@/components/new-release-promo";
+import { PricingSection } from "@/components/pricing-section";
+import Steps from "@/components/steps";
+import { StickyFooter } from "@/components/sticky-footer";
+import { TestimonialsSection } from "@/components/testimonials";
+import { useEffect, useState } from "react";
 
 export default function Home() {
-  // State management for current analysis and UI states
-  const [currentAnalysis, setCurrentAnalysis] = useState<AnalysisResult | null>(null);
-  const [loadingState, setLoadingState] = useState<LoadingState>({ isLoading: false });
-  const [error, setError] = useState<string>('');
-  const [successMessage, setSuccessMessage] = useState<string>('');
-  const [warningMessage, setWarningMessage] = useState<string>('');
-  const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Handle successful analysis result
-  const handleAnalysisResult = (result: AnalysisResult, hasWarning?: boolean) => {
-    setCurrentAnalysis(result);
-    setError(''); // Clear any previous errors
-    setWarningMessage(''); // Clear any previous warnings
+  useEffect(() => {
+    const root = window.document.documentElement;
+    root.classList.remove("light", "system");
+    root.classList.add("dark");
+  }, []);
 
-    // Show warning if analysis completed but couldn't save to history
-    if (hasWarning) {
-      setWarningMessage(`Analysis completed for ${result.companyName}, but couldn't save to history.`);
-    }
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 100);
+    };
 
-    // Trigger refresh of recent searches to include the new analysis
-    setRefreshTrigger((prev) => prev + 1);
-  };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
-  // Handle analysis errors
-  const handleAnalysisError = (errorMessage: string) => {
-    setError(errorMessage);
-    setCurrentAnalysis(null); // Clear current analysis on error
-    setSuccessMessage(''); // Clear any success messages
-    setWarningMessage(''); // Clear any warning messages
-  };
+  const handleMobileNavClick = (elementId: string) => {
+    setIsMobileMenuOpen(false);
+    setTimeout(() => {
+      const element = document.getElementById(elementId);
+      if (element) {
+        const headerOffset = 120; // Account for sticky header height + margin
+        const elementPosition =
+          element.getBoundingClientRect().top + window.pageYOffset;
+        const offsetPosition = elementPosition - headerOffset;
 
-  // Handle success messages
-  const handleSuccess = (message: string) => {
-    setSuccessMessage(message);
-    setError(''); // Clear any previous errors
-  };
-
-  // Handle loading state changes
-  const handleLoadingChange = (loading: LoadingState) => {
-    setLoadingState(loading);
-  };
-
-  // Clear error and retry
-  const handleRetry = () => {
-    setError('');
-  };
-
-  // Clear success message
-  const handleDismissSuccess = () => {
-    setSuccessMessage('');
-  };
-
-  // Clear warning message
-  const handleDismissWarning = () => {
-    setWarningMessage('');
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: "smooth",
+        });
+      }
+    }, 100);
   };
 
   return (
-    <div className='min-h-screen bg-white'>
-      {/* Header */}
-      <header className='border-b border-gray-100 sticky top-0 bg-white'>
-        <div className='max-w-6xl mx-auto px-6 py-6'>
-          <div className='flex items-center justify-between'>
-            <div className='flex items-center space-x-3'>
-              <div className='w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center'>
-                <svg className='w-5 h-5 text-white' fill='currentColor' viewBox='0 0 20 20'>
-                  <path d='M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' />
-                </svg>
-              </div>
-              <span className='text-2xl p-0 font-bold text-orange-500'>Outsourcing</span>
-              <span className='text-2xl font-bold text-gray-700'>Analyzer </span>
-            </div>
-            <nav className='hidden md:flex items-center space-x-8 text-sm text-gray-600'>
-              <a href='#' className='hover:text-gray-900 transition-colors'>
-                Docs
-              </a>
-              <button className='text-gray-900 font-medium'>Sign in</button>
-            </nav>
-          </div>
+    <div className="min-h-screen w-full relative bg-black">
+      {/* Pearl Mist Background with Top Glow */}
+      <div
+        className="absolute inset-0 z-0"
+        style={{
+          background:
+            "radial-gradient(ellipse 50% 35% at 50% 0%, rgba(226, 232, 240, 0.12), transparent 60%), #000000",
+        }}
+      />
+
+      {/* Desktop Header */}
+      <header
+        className={`sticky top-4 z-[9999] mx-auto hidden w-full flex-row items-center justify-between self-start rounded-full bg-background/80 md:flex backdrop-blur-sm border border-border/50 shadow-lg transition-all duration-300 ${
+          isScrolled ? "max-w-3xl px-2" : "max-w-5xl px-4"
+        } py-2`}
+        style={{
+          willChange: "transform",
+          transform: "translateZ(0)",
+          backfaceVisibility: "hidden",
+          perspective: "1000px",
+        }}
+      >
+        <a
+          className={`z-50 flex items-center justify-center gap-2 transition-all duration-300 ${
+            isScrolled ? "ml-4" : ""
+          }`}
+          href="https://v0.app"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <svg
+            fill="currentColor"
+            viewBox="0 0 147 70"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+            className="text-foreground rounded-full size-8 w-8"
+          >
+            <path d="M56 50.2031V14H70V60.1562C70 65.5928 65.5928 70 60.1562 70C57.5605 70 54.9982 68.9992 53.1562 67.1573L0 14H19.7969L56 50.2031Z"></path>
+            <path d="M147 56H133V23.9531L100.953 56H133V70H96.6875C85.8144 70 77 61.1856 77 50.3125V14H91V46.1562L123.156 14H91V0H127.312C138.186 0 147 8.81439 147 19.6875V56Z"></path>
+          </svg>
+        </a>
+
+        <div className="absolute inset-0 hidden flex-1 flex-row items-center justify-center space-x-2 text-sm font-medium text-muted-foreground transition duration-200 hover:text-foreground md:flex md:space-x-2">
+          <a
+            className="relative px-4 py-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            onClick={(e) => {
+              e.preventDefault();
+              const element = document.getElementById("features");
+              if (element) {
+                const headerOffset = 120; // Account for sticky header height + margin
+                const elementPosition =
+                  element.getBoundingClientRect().top + window.pageYOffset;
+                const offsetPosition = elementPosition - headerOffset;
+
+                window.scrollTo({
+                  top: offsetPosition,
+                  behavior: "smooth",
+                });
+              }
+            }}
+          >
+            <span className="relative z-20">Features</span>
+          </a>
+          <a
+            className="relative px-4 py-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            onClick={(e) => {
+              e.preventDefault();
+              const element = document.getElementById("pricing");
+              if (element) {
+                const headerOffset = 120; // Account for sticky header height + margin
+                const elementPosition =
+                  element.getBoundingClientRect().top + window.pageYOffset;
+                const offsetPosition = elementPosition - headerOffset;
+
+                window.scrollTo({
+                  top: offsetPosition,
+                  behavior: "smooth",
+                });
+              }
+            }}
+          >
+            <span className="relative z-20">Pricing</span>
+          </a>
+          <a
+            className="relative px-4 py-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            onClick={(e) => {
+              e.preventDefault();
+              const element = document.getElementById("testimonials");
+              if (element) {
+                const headerOffset = 120; // Account for sticky header height + margin
+                const elementPosition =
+                  element.getBoundingClientRect().top + window.pageYOffset;
+                const offsetPosition = elementPosition - headerOffset;
+
+                window.scrollTo({
+                  top: offsetPosition,
+                  behavior: "smooth",
+                });
+              }
+            }}
+          >
+            <span className="relative z-20">Testimonials</span>
+          </a>
+          <a
+            className="relative px-4 py-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            onClick={(e) => {
+              e.preventDefault();
+              const element = document.getElementById("faq");
+              if (element) {
+                const headerOffset = 120; // Account for sticky header height + margin
+                const elementPosition =
+                  element.getBoundingClientRect().top + window.pageYOffset;
+                const offsetPosition = elementPosition - headerOffset;
+
+                window.scrollTo({
+                  top: offsetPosition,
+                  behavior: "smooth",
+                });
+              }
+            }}
+          >
+            <span className="relative z-20">FAQ</span>
+          </a>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <a
+            href="/login"
+            className="font-medium transition-colors hover:text-foreground text-muted-foreground text-sm cursor-pointer"
+          >
+            Log In
+          </a>
+
+          <a
+            href="/signup"
+            className="rounded-md font-bold relative cursor-pointer hover:-translate-y-0.5 transition duration-200 inline-block text-center bg-gradient-to-b from-primary to-primary/80 text-primary-foreground shadow-[0px_2px_0px_0px_rgba(255,255,255,0.3)_inset] px-4 py-2 text-sm"
+          >
+            Sign Up
+          </a>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className='max-w-6xl mx-auto px-6 py-16'>
-        {/* Hero Section */}
-        <div className='text-center mb-16'>
-          <h1 className='text-5xl font-bold text-gray-700 mb-6'>
-            Validate <span className='text-orange-400'>Business Leads</span> Easily with{' '}
-            <span className='text-orange-400'>AI</span> <br />
-            <span className='text-3xl'> Looking for Outsourcing Services </span>
-          </h1>
+      {/* Mobile Header */}
+      <header className="sticky top-4 z-[9999] mx-4 flex w-auto flex-row items-center justify-between rounded-full bg-background/80 backdrop-blur-sm border border-border/50 shadow-lg md:hidden px-4 py-3">
+        <a
+          className="flex items-center justify-center gap-2"
+          href="https://v0.app"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <svg
+            fill="currentColor"
+            viewBox="0 0 147 70"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+            className="text-foreground rounded-full size-7 w-7"
+          >
+            <path d="M56 50.2031V14H70V60.1562C70 65.5928 65.5928 70 60.1562 70C57.5605 70 54.9982 68.9992 53.1562 67.1573L0 14H19.7969L56 50.2031Z"></path>
+            <path d="M147 56H133V23.9531L100.953 56H133V70H96.6875C85.8144 70 77 61.1856 77 50.3125V14H91V46.1562L123.156 14H91V0H127.312C138.186 0 147 8.81439 147 19.6875V56Z"></path>
+          </svg>
+        </a>
 
-          <p className='text-xl text-gray-600 mb-12'>
-            Better <span className='text-blue-600'>insights</span>, better <span className='text-blue-600'>accuracy</span>, more 
-            <span className='text-blue-600'> conversion</span>
-          </p>
-
-          {/* Search Input */}
-          <div className='max-w-2xl mx-auto mb-16'>
-            <ErrorBoundary>
-              <CompanyForm
-                onAnalysisResult={handleAnalysisResult}
-                onError={handleAnalysisError}
-                onSuccess={handleSuccess}
-                loadingState={loadingState}
-                onLoadingChange={handleLoadingChange}
-              />
-            </ErrorBoundary>
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="flex items-center justify-center w-10 h-10 rounded-full bg-background/50 border border-border/50 transition-colors hover:bg-background/80"
+          aria-label="Toggle menu"
+        >
+          <div className="flex flex-col items-center justify-center w-5 h-5 space-y-1">
+            <span
+              className={`block w-4 h-0.5 bg-foreground transition-all duration-300 ${
+                isMobileMenuOpen ? "rotate-45 translate-y-1.5" : ""
+              }`}
+            ></span>
+            <span
+              className={`block w-4 h-0.5 bg-foreground transition-all duration-300 ${
+                isMobileMenuOpen ? "opacity-0" : ""
+              }`}
+            ></span>
+            <span
+              className={`block w-4 h-0.5 bg-foreground transition-all duration-300 ${
+                isMobileMenuOpen ? "-rotate-45 -translate-y-1.5" : ""
+              }`}
+            ></span>
           </div>
-        </div>
+        </button>
+      </header>
 
-        {/* Two Column Layout */}
-        <div className='grid grid-cols-1 lg:grid-cols-6 gap-8'>
-          {/* Left Column - Analysis Results (4/5 width) */}
-          <div className='lg:col-span-4 space-y-6'>
-            {/* Success Message Display */}
-            {successMessage && (
-              <div className='mb-4 p-3 bg-green-50 border border-green-200 rounded-lg'>
-                <p className='text-sm text-green-700'>{successMessage}</p>
-                <button onClick={handleDismissSuccess} className='mt-2 text-xs text-green-600 hover:text-green-700 underline'>
-                  Dismiss
-                </button>
-              </div>
-            )}
-
-            {/* Warning Message Display */}
-            {warningMessage && (
-              <div className='mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg'>
-                <p className='text-sm text-yellow-700'>{warningMessage}</p>
-                <button onClick={handleDismissWarning} className='mt-2 text-xs text-yellow-600 hover:text-yellow-700 underline'>
-                  Dismiss
-                </button>
-              </div>
-            )}
-
-            {/* Error Display */}
-            {error && (
-              <div className='mb-4 p-3 bg-red-50 border border-red-200 rounded-lg'>
-                <p className='text-sm text-red-700'>{error}</p>
-                <button onClick={handleRetry} className='mt-2 text-xs text-red-600 hover:text-red-700 underline'>
-                  Try again
-                </button>
-              </div>
-            )}
-
-            {/* Analysis Result Display */}
-            {currentAnalysis && !loadingState.isLoading && (
-              <ErrorBoundary>
-                <AnalysisCard analysis={currentAnalysis} />
-              </ErrorBoundary>
-            )}
-
-            {/* Loading State for Analysis */}
-            {loadingState.isLoading && (
-              <div className='bg-white border border-gray-200 rounded-lg p-8 text-center'>
-                <div className='animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-blue-600 mx-auto mb-4'></div>
-                <p className='text-gray-600'>{loadingState.message || 'Analyzing company...'}</p>
-              </div>
-            )}
-          </div>
-
-          {/* Right Column - Analysis History (1/5 width) */}
-          <div className='lg:col-span-2'>
-            <div className='mb-6'>
-              <div className='flex items-center justify-between mb-4'>
-                <h3 className='text-lg font-semibold text-gray-900'>Analysis History</h3>
-                <a href='#' className='text-sm text-blue-600 hover:text-blue-700'>
-                  View All →
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-[9998] bg-black/50 backdrop-blur-sm md:hidden">
+          <div className="absolute top-20 left-4 right-4 bg-background/95 backdrop-blur-md border border-border/50 rounded-2xl shadow-2xl p-6">
+            <nav className="flex flex-col space-y-4">
+              <button
+                onClick={() => handleMobileNavClick("features")}
+                className="text-left px-4 py-3 text-lg font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-background/50"
+              >
+                Features
+              </button>
+              <button
+                onClick={() => handleMobileNavClick("pricing")}
+                className="text-left px-4 py-3 text-lg font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-background/50"
+              >
+                Pricing
+              </button>
+              <button
+                onClick={() => handleMobileNavClick("testimonials")}
+                className="text-left px-4 py-3 text-lg font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-background/50"
+              >
+                Testimonials
+              </button>
+              <button
+                onClick={() => handleMobileNavClick("faq")}
+                className="text-left px-4 py-3 text-lg font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-background/50"
+              >
+                FAQ
+              </button>
+              <div className="border-t border-border/50 pt-4 mt-4 flex flex-col space-y-3">
+                <a
+                  href="/login"
+                  className="px-4 py-3 text-lg font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-background/50 cursor-pointer"
+                >
+                  Log In
+                </a>
+                <a
+                  href="/signup"
+                  className="px-4 py-3 text-lg font-bold text-center bg-gradient-to-b from-primary to-primary/80 text-primary-foreground rounded-lg shadow-lg hover:-translate-y-0.5 transition-all duration-200"
+                >
+                  Sign Up
                 </a>
               </div>
-
-              <ErrorBoundary>
-                <RecentSearches refreshTrigger={refreshTrigger} />
-              </ErrorBoundary>
-            </div>
+            </nav>
           </div>
         </div>
-      </main>
+      )}
+
+      {/* Hero Section */}
+      <Hero />
+
+      {/* Features Section */}
+      <div id="features">
+        <Features />
+      </div>
+      <div id="steps">
+        <Steps />
+      </div>
+      {/* Pricing Section */}
+      <div id="pricing">
+        <PricingSection />
+      </div>
+
+      {/* Testimonials Section */}
+      <div id="testimonials">
+        <TestimonialsSection />
+      </div>
+
+      <NewReleasePromo />
+
+      {/* FAQ Section */}
+      <div id="faq">
+        <FAQSection />
+      </div>
+
+      {/* Sticky Footer */}
+      <StickyFooter />
     </div>
   );
 }
