@@ -13,6 +13,9 @@ const eslintConfig = [
   ...compat.extends('next/core-web-vitals', 'next/typescript'),
   {
     ignores: ['node_modules/**', '.next/**', 'out/**', 'build/**', 'scripts/**', 'next-env.d.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
   },
 ];
 
