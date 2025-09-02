@@ -3,6 +3,7 @@ import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
 import type React from "react";
 import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "Leads Gen",
@@ -26,6 +27,7 @@ html {
       </head>
       <body className="dark" suppressHydrationWarning>
         {children}
+        <Toaster richColors />
       </body>
     </html>
   );
