@@ -53,6 +53,21 @@ export const Login = () => {
       },
     });
   };
+  const googleSignHandler = () => {
+    authClient.signIn.social({
+      provider: "google",
+      callbackURL: "/protected",
+      fetchOptions: {
+        onRequest: () => setIsLoading(true),
+        onError: (ctx) => {
+          setIsLoading(false);
+          toast.error("Failed", {
+            description: ctx.error.message,
+          });
+        },
+      },
+    });
+  };
   const { control } = form;
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-4">
@@ -215,6 +230,8 @@ export const Login = () => {
             <Button
               variant="outline"
               className="bg-zinc-900/50 border-zinc-800 text-zinc-300 hover:bg-white hover:text-black hover:border-white transition-all duration-200 group"
+              type="button"
+              onClick={googleSignHandler}
             >
               <svg
                 className="w-5 h-5 mr-2 text-zinc-300 group-hover:text-black transition-colors duration-200"

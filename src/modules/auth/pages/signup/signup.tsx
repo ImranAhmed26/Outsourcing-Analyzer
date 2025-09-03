@@ -34,8 +34,8 @@ export const Signup = () => {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const SubmitHandler = async (values: SignupFormData) => {
-    await authClient.signUp.email({
+  const submitHandler = (values: SignupFormData) => {
+    authClient.signUp.email({
       ...values,
       fetchOptions: {
         onRequest: () => setIsLoading(true),
@@ -44,6 +44,21 @@ export const Signup = () => {
           toast.success("Success", { description: "Activation email is sent" });
           form.reset();
         },
+        onError: (ctx) => {
+          setIsLoading(false);
+          toast.error("Failed", {
+            description: ctx.error.message,
+          });
+        },
+      },
+    });
+  };
+  const googleSignHandler = () => {
+    authClient.signIn.social({
+      provider: "google",
+      callbackURL: "/protected",
+      fetchOptions: {
+        onRequest: () => setIsLoading(true),
         onError: (ctx) => {
           setIsLoading(false);
           toast.error("Failed", {
@@ -119,7 +134,7 @@ export const Signup = () => {
         >
           <Form {...form}>
             <form
-              onSubmit={form.handleSubmit(SubmitHandler)}
+              onSubmit={form.handleSubmit(submitHandler)}
               className="space-y-6"
             >
               <FormField
@@ -204,7 +219,7 @@ export const Signup = () => {
                           className="rounded border-zinc-700 bg-zinc-800 text-[#e78a53] focus:ring-[#e78a53]/20"
                         />
                       </FormControl>
-                      <FormLabel>
+                      <FormLabel className="data-[error=true]:text-zinc-400">
                         I agree to the{" "}
                         <Link
                           href="#"
@@ -269,8 +284,10 @@ export const Signup = () => {
 
           <div className="mt-6 grid grid-cols-2 gap-3">
             <Button
+              type="button"
               variant="outline"
               className="bg-zinc-900/50 border-zinc-800 text-zinc-300 hover:bg-white hover:text-black hover:border-white transition-all duration-200 group"
+              onClick={googleSignHandler}
             >
               <svg
                 className="w-5 h-5 mr-2 text-zinc-300 group-hover:text-black transition-colors duration-200"
