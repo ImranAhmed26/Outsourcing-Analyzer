@@ -170,6 +170,12 @@ export default function Home() {
           >
             <span className="relative z-20">FAQ</span>
           </a>
+          <a
+            href="/enrich"
+            className="relative px-4 py-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+          >
+            <span className="relative z-20">Enrich</span>
+          </a>
         </div>
 
         <div className="flex items-center gap-4">
