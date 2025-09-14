@@ -2,7 +2,6 @@ import { betterAuth } from "better-auth";
 import Database from "better-sqlite3";
 
 import { Resend } from "resend";
-import { MailerSend, EmailParams, Sender, Recipient } from "mailersend";
 
 const sendEmail = ({
   subject,
